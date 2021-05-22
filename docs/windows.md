@@ -37,3 +37,11 @@ As a minimum, props should include a field called `class` which specifies which 
   * `horizontalSize` - set this to `true` to allow horizontal resizing of this window
   * `verticalSize` - set this to `true` to allow vertical resizing of this window
   * `cursor` - set this to to a cursor number to change which mouse cursor is displayed when the pointer is over the content area of this window
+
+### Mouse Cursor Numbers
+
+  0. pointer (arrow)
+  1. crosshair
+  2. horizontal sizer
+  3. vertical sizer
+  4. diagonal sizer
