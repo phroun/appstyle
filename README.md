@@ -1,7 +1,9 @@
 # appstyle
 appstyle.js - a window manager for HTML5 canvas
 
-# How do I start using appstyle?
+# Quick Start Guide
+
+## How do I start using appstyle?
 
 Currently jQuery is required, and needs to be loaded first. The dependency on jQuery is actually quite minimal and should be able to be removed in the near future.
 
@@ -33,9 +35,9 @@ Here's a minimal example of an appstyle app:
 
 Note: If you want your code to run without dependency on Internet access, you should download jquery and reference it locally with `<script src="jquery-3.6.0.min.js"></script>` instead of loading it from a CDN.
 
-# Concepts
+## Concepts
 
-## Using Window Classes to define Callback Functions
+### Using Window Classes to define Callback Functions
 
 When you use [appstyle.registerWindowClass()](docs/windows.md#appstyleregisterwindowclassclassname-props) you get to specify some callbacks that let you define and override functionality of an appstyle window:
 
@@ -46,7 +48,7 @@ When you use [appstyle.registerWindowClass()](docs/windows.md#appstyleregisterwi
 
 In addition to callbacks, you can also specify whatever other default options you would like windows of this class to have. If you plan to share your Window Classes with other developers, choose a Class Name that is prefixed with a vendor identifier.  We use "appstyle." to prefix Window Classes provided by the appstyle library.
 
-## Creating Windows
+### Creating Windows
 
 Once you have a Window Class registered you can make a window by calling [appstyle.makeWindow()](docs/windows.md#appstylemakewindowprops) pass along a list of options. Here are a few examples:
 
@@ -59,13 +61,13 @@ Once you have a Window Class registered you can make a window by calling [appsty
 
 For the complete list of properties, see [Window Properties](docs/windows.md#window-properties).
 
-## The Character Grid vs. Pixel Coordinates
+### The Character Grid vs. Pixel Coordinates
 
 Although you can use pixels to place and position everything, we provide a "[Character Grid](docs/grid-system.md#character-grid)" to help make window layout easier, and to make programming more akin to the text-mode development common on computers of the 1980s.
 
 Any time you specify a width or height, or the x or y coordinate of a widget within a window, you can use this system. The coordinates do not need to be whole numbers, so if you want to place something half way between line 1 and 2, just use 1.5.  If you find the need to use pixel sizing and placement for a specific widget, we have a "[Pixel Mode](docs/grid-system.md#pixel-mode)" option to do this as well.
 
-## Writing your Widget Handler
+### Writing your Widget Handler
 
 The [Widget Handler](docs/callbacks.md#widgets-handler) for a window gets called every time the screen is painted. Its purpose is to generate the list of widgets that will be used to respond to mouse input and to paint the window.
 
@@ -81,7 +83,7 @@ Generally speaking, Widgets will be painted in the order they are defined, so if
 
 For a complete list of Widgets, see the [Documentation Index](docs/README.md)
 
-## Responding to Events
+### Responding to Events
 
 You'll need to write an [Event Handler](docs/callbacks.md#event-handler) for your Window Class in order to respond to events.  Here is a small example:
 
