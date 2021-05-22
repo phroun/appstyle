@@ -57,7 +57,7 @@ Once you have a Window Class registered you can make a window by calling [appsty
   * `horizontalSize` - set this to `true` to allow horizontal resizing of this window
   * `verticalSize` - set this to `true` to allow vertical resizing of this window
 
-For the complete list of properties, see [Window Properties](doc/windows.md#window-properties).
+For the complete list of properties, see [Window Properties](docs/windows.md#window-properties).
 
 ## The Character Grid vs. Pixel Coordinates
 
