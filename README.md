@@ -73,13 +73,13 @@ The default paint handler is sufficient to show most of the available stock widg
 
 Generally speaking, Widgets will be painted in the order they are defined, so if you want something to overlap something else, define it after the Widget it needs to go on top of.
 
-### Widgets included in the standard library:
+### Some of the Widgets included in the standard library:
 
   * [appstyle.text(win, caption, props)](docs/text.md) - Shows some text. (Limited to a single line.)
   * [appstyle.textInput(win, storage, defaultValue, props)](docs/textInput.md) - Allows the user to input text. This currently has some limitations because it falls back to the HTML DOM when it is focused.
   * [appstyle.button(win, id, caption, props)](docs/button.md) - A pushbutton the user can click to trigger some sort of action.
-  * [appstyle.pane(win, storage, props)](docs/pane.md) - A container to hold other widgets. Supports scrolling.
-  * [appstyle.custom(win, className, props)](docs/custom.md) - Any other widget. You'll need to provide your own painting and event handlers.
+
+For a complete list of Widgets, see the [Documentation Index](docs/README.md)
 
 ## Responding to Events
 
