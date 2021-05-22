@@ -17,7 +17,7 @@ In addition to callbacks, you can also specify whatever other default options yo
 
 As a minimum, props should include a field called `class` which specifies which Window Class to apply to the window being created.
 
-## [Window Properties](#window-properties)
+## Window Properties
 
   * `class` - the Window Class for the type of window you'd like to create
   * `title` - the title of this window
