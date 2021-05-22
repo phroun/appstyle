@@ -1,6 +1,10 @@
 [Return to Documentation Index](/README.md)
 
-# Drawing Functinos
+## Custom Painting
+
+If you add a [Paint Handler](docs/callbacks.md#paint-handler) to your Window Class, you'll be passed the window object and a 2D canvas drawing context. The standard library has some functions that you can call manually which are normally part of the default paint handler.
+
+# Drawing Functions
 
 ## [appstyle.drawBackground(win, ctx)](#draw-background)
 
