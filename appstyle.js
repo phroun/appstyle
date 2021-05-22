@@ -2969,10 +2969,20 @@ $(document).ready(function() {
 });
   
   return {
+    // basic usage
     registerWindowClass: registerWindowClass,
     makeWindow: makeWindow,
     closeWindow: closeWindow,
+    setWidgetDefaults: setWidgetDefaults,
     bringToTop: bringToTop,
+    triggerEvent: triggerEvent,
+
+    // drawing functions
+    drawBackground: drawBackground,
+    drawWidgets: drawWidgets,
+    drawText: drawText,
+
+    // helper functions
     getMousePos: getMousePos,
     getLocalPos: getLocalPos,
     getWidgetById: getWidgetById,
@@ -2981,13 +2991,8 @@ $(document).ready(function() {
     getCharFromPos: getCharFromPos,
     canWidgetFocus: canWidgetFocus,
     isWithinWidget: isWithinWidget,
-    drawBackground: drawBackground,
-    drawWidgets: drawWidgets,
-    drawText: drawText,
-    triggerEvent: triggerEvent,
-    windowList: windowList,
-    windowClasses: windowClasses,
-    setWidgetDefaults: setWidgetDefaults,
+
+    // auxiliary functions
     toggleFullScreen: toggleFullScreen,
     requestUpload: requestUpload,
 
@@ -2995,6 +3000,12 @@ $(document).ready(function() {
     custom: custom,
     text: text,
     textInput: textInput,
+    pane: pane,
+    button: button,
+
+    // other things
+    windowList: windowList,
+    windowClasses: windowClasses,
     options: options,
     theme: theme,
     internals: {
