@@ -37,7 +37,7 @@ Note: If you want your code to run without dependency on Internet access, you sh
 
 ## Using Window Classes to define Callback Functions
 
-When you use [appstyle.registerWindowClass()](docs/windows.md#register-window-class) you get to specify some callbacks that let you define and override functionality of an appstyle window:
+When you use [appstyle.registerWindowClass()](docs/windows.md#appstyleregisterwindowclassclassname-props) you get to specify some callbacks that let you define and override functionality of an appstyle window:
 
   * [widgets(win)](docs/callbacks.md#widgets-handler) - this defines the layout of a window
   * [event(win, evt)](docs/callbacks.md#event-handler) - this lets you respond to things such as user interaction (buttons being clicked, etc.)
