@@ -106,9 +106,6 @@ $(document).ready(function() {
 });
 ```
 
-### Window Manager Events
-  * [close](docs/windows.md#window-manager-events) - fired when the close button in the upper corner of the window is activated
-
 ### Keyboard Events
   * [keyDown](docs/keyboard-events.md#key-down) - fired when a keyboard key is pressed down
   * [keyUp](docs/keyboard-events.md#key-up) - fired when a keyboard key is released
