@@ -1,6 +1,10 @@
 # appstyle
 appstyle.js - a window manager for HTML5 canvas
 
+### Demo
+
+See a small demo here: https://zebby.org/appstyle/
+
 # Quick Start Guide
 
 ## How do I start using appstyle?
