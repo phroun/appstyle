@@ -35,7 +35,7 @@ Note: If you want your code to run without dependency on Internet access, you sh
 
 # Concepts
 
-### Using Window Classes to define Callback Functions
+## Using Window Classes to define Callback Functions
 
 When you use [appstyle.registerWindowClass()](docs/windows.md#register-window-class) you get to specify some callbacks that let you define and override functionality of an appstyle window:
 
@@ -45,12 +45,6 @@ When you use [appstyle.registerWindowClass()](docs/windows.md#register-window-cl
   * [paintPane(win, ctx, pane)](docs/callbacks.md#paintPane-handler) - for changing the behavior of how a pane is painted.
 
 In addition to callbacks, you can also specify whatever other default options you would like windows of this class to have. If you plan to share your Window Classes with other developers, choose a Class Name that is prefixed with a vendor identifier.  We use "appstyle." to prefix Window Classes provided by the appstyle library.
-
-## The Character Grid vs. Pixel Coordinates
-
-Although you can use pixels to place and position everything, we provide a "[Character Grid](docs/grid-system.md#character-grid)" to help make window layout easier, and to make programming more akin to the text-mode development common on computers of the 1980s.
-
-Any time you specify a width or height, or the x or y coordinate of a widget within a window, you can use this system. The coordinates do not need to be whole numbers, so if you want to place something half way between line 1 and 2, just use 1.5.  If you find the need to use pixel sizing and placement for a specific widget, we have a "[Pixel Mode](docs/grid-system.md#pixel-mode)" option to do this as well.
 
 ## Creating Windows
 
@@ -74,6 +68,12 @@ Once you have a Window Class registered you can make a window by calling [appsty
   * `horizontalSize` - set this to `true` to allow horizontal resizing of this window
   * `verticalSize` - set this to `true` to allow vertical resizing of this window
   * `cursor` - set this to to a cursor number to change which mouse cursor is displayed when the pointer is over the content area of this window
+
+## The Character Grid vs. Pixel Coordinates
+
+Although you can use pixels to place and position everything, we provide a "[Character Grid](docs/grid-system.md#character-grid)" to help make window layout easier, and to make programming more akin to the text-mode development common on computers of the 1980s.
+
+Any time you specify a width or height, or the x or y coordinate of a widget within a window, you can use this system. The coordinates do not need to be whole numbers, so if you want to place something half way between line 1 and 2, just use 1.5.  If you find the need to use pixel sizing and placement for a specific widget, we have a "[Pixel Mode](docs/grid-system.md#pixel-mode)" option to do this as well.
 
 ## Writing your Widget Handler
 
@@ -141,25 +141,3 @@ $(document).ready(function() {
   * [focusNext](docs/focus.md#focus-next) - fired when focus is supposed to go to the next interactive widget in squence
   * [focusPrior](docs/focus.md#focus-prior) - fired when focus is supposed to go to the prior interactive widget in sequence
   * [focusLast](docs/focus.md#focus-last) - fired when focus is supposed to go to the last interactive widget in sequence
-
-## Custom Painting
-
-If you add a [Paint Handler](docs/callbacks.md#paint-handler) to your Window Class, you'll be passed the window object and a 2D canvas drawing context. The standard library has some functions that you can call manually which are normally part of the default paint handler:
-
-  * [appstyle.drawBackground](docs/drawing.md#draw-background) - This paints the background of the window. If you don't call this, or paint the background area yourself, the window will be see-through.
-  * [appstyle.drawWidgets](docs/drawing.md#draw-widgets) - This paints all of the widgets on the window.
-  * [appstyle.drawText](docs/drawing.md#draw-text) - This paints text onto the canvas in the same way the default widgets do.
-  * [appstyle.drawFlatOutline](docs/drawing.md#draw-flat-outline) - This draws a flat colored outline surrounding a rectangular area.
-  * [appstyle.drawBevel](docs/drawing.md#draw-bevel) - This draws a beveled outline surrounding a rectangular area.
-
-## Window Classes in the standard library:
-
-  * `appstyle.debugger` - An inspector/debugger tool window.
-
-## Mouse Cursor Numbers
-
-  0. pointer (arrow)
-  1. crosshair
-  2. horizontal sizer
-  3. vertical sizer
-  4. diagonal sizer
