@@ -48,7 +48,7 @@ In addition to callbacks, you can also specify whatever other default options yo
 
 ## Creating Windows
 
-Once you have a Window Class registered you can make a window by calling [appstyle.makeWindow()](docs/windows.md#make-window) pass along a list of options. Here are a few examples:
+Once you have a Window Class registered you can make a window by calling [appstyle.makeWindow()](docs/windows.mdhttps://github.com/phroun/appstyle/blob/main/docs/windows.md#appstylemakewindowprops) pass along a list of options. Here are a few examples:
 
   * `class` - the Window Class for the type of window you'd like to create
   * `title` - the title of this window
