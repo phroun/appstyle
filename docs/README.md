@@ -35,4 +35,4 @@
 
 ## Window Classes in the standard library:
 
-  * `appstyle.debugger` - An inspector/debugger tool window.
+  * `"appstyle.debugger"` - An inspector/debugger tool window.
