@@ -1,10 +1,6 @@
 # appstyle
 appstyle.js - a window manager for HTML5 canvas
 
-### Demo
-
-See a small demo here: https://zebby.org/appstyle/
-
 # Quick Start Guide
 
 ## How do I start using appstyle?
@@ -38,6 +34,10 @@ Here's a minimal example of an appstyle app:
 ```
 
 Note: If you want your code to run without dependency on Internet access, you should download jquery and reference it locally with `<script src="jquery-3.6.0.min.js"></script>` instead of loading it from a CDN.
+
+### Demo
+
+You can see a small live demo here: https://zebby.org/appstyle/
 
 ## Concepts
 
