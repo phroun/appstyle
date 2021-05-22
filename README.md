@@ -75,13 +75,23 @@ The default paint handler is sufficient to show most of the available stock widg
 
 Generally speaking, Widgets will be painted in the order they are defined, so if you want something to overlap something else, define it after the Widget it needs to go on top of.
 
-### Some of the Widgets included in the standard library:
+Some of the Widgets included in the standard library are:
 
-  * [appstyle.text(win, caption, props)](docs/text.md) - Shows some text. (Limited to a single line.)
-  * [appstyle.textInput(win, storage, defaultValue, props)](docs/textInput.md) - Allows the user to input text. This currently has some limitations because it falls back to the HTML DOM when it is focused.
-  * [appstyle.button(win, id, caption, props)](docs/button.md) - A pushbutton the user can click to trigger some sort of action.
+  * [appstyle.text(win, caption, props)](docs/widgets/README.md#text) - Shows some text. (Limited to a single line.)
+  * [appstyle.textInput(win, storage, defaultValue, props)](docs/widgets/README.md#text-input) - Allows the user to input text. This currently has some limitations because it falls back to the HTML DOM when it is focused.
+  * [appstyle.button(win, id, caption, props)](docs/widgets/README.md#button) - A pushbutton the user can click to trigger some sort of action.
 
 For a complete list of Widgets, see the [Documentation Index](docs/README.md)
+
+In order to create a Widget in the Widget Handler, just call its corresponding function, passing along the window object, and specifying any other required parameters. Any additional properties may be added by including them in the `props` object:
+
+```js
+function myWindowWidgets(win) {
+  appstyle.button(win, 'myButton', 'Click Me!', {x:0, y:0, w:10});
+}
+```
+
+If you're going to be creating several Widgets that share common properties, you might find it convenient to call `setWidgetDefaults(props)` to specify them.  Calling it again with an empty object, as in `setWidgetDefaults({})`, will remove any defaults that have been set. The Widget Defaults start out blank at the beginning of each frame when your Widget Handler is first called.
 
 ### Responding to Events
 
