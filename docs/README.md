@@ -12,6 +12,7 @@
  * [Keyboard Events](keyboard-events.md)
  * [Mouse Events](mouse-events.md)
  * [Focus and Focus Events](focus.md)
+ * [Widget State Storage](storage.md)
 
 ### Widget Library
 
