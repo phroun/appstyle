@@ -12,7 +12,21 @@
  * [Keyboard Events](keyboard-events.md)
  * [Mouse Events](mouse-events.md)
  * [Focus](focus.md)
- * [Widgets](widgets/README.md)
+
+### Widget Library
+
+# Widgets
+
+* [text](widgets/README.md#text)
+* [textInput](widgets/README.md#text-input)
+* [button](widgets/README.md#button)
+* [toolButton](widgets/README.md#tool-button) - not complete
+* [custom](widgets/README.md#custom)
+* [pane](widgets/README.md#pane)
+* [checkbox](widgets/README.md#checkbox) - not complete
+* [radioButton](widgets/README.md#radio-button) - not complete
+* [stepper](widgets/README.md#stepper) - not complete
+* [slider](widgets/README.md#slider) - not complete
 
 ### Other Reference
 
