@@ -125,14 +125,14 @@ $(document).ready(function() {
   * [keyPress](docs/events/keyPress.md) - fired when a keyboard key is pressed and released, or when the key auto-repeats due to being held down continuously
 
 ### Mouse Events
-  * [mouseDown](docs/events/mouseDown.md) - fired when the mouse button is pressed down
-  * [mouseUp](docs/events/mouseUp.md) - fired when the mouse button is released
-  * [click](docs/events/click.md) - fired when the mouse is released on the same widget where it was pressed down
-  * [dblClick](docs/events/dblClick.md) - fired when two clicks happen on the same widget in rapidy successio
-  * [dragFrame](docs/events/dragFrame.md) - fired when the user begins to move the window by dragging the window's title bar
-  * [dropFrame](docs/events/dropFrame.md) - fired when the user ends moving a window by way of dragging the window's title bar
-  * [drop](docs/events/drop.md) - fired when a drag operation ends
-  * [dropOnFrame](docs/events/dropOnFrame.md) - fired when a drag operation ends but the cursor is over the frame rather than the content area of the target window
+  * [mouseDown](docs/mouse-events.md#mouse-down) - fired when the mouse button is pressed down
+  * [mouseUp](docs/mouse-events.md#mouse-up) - fired when the mouse button is released
+  * [click](docs/mouse-events.md#click) - fired when the mouse is released on the same widget where it was pressed down
+  * [dblClick](docs/mouse-events.md#dbl-click) - fired when two clicks happen on the same widget in rapidy successio
+  * [dragFrame](docs/mouse-events.md#drag-frame) - fired when the user begins to move the window by dragging the window's title bar
+  * [dropFrame](docs/mouse-events.md#drop-frame) - fired when the user ends moving a window by way of dragging the window's title bar
+  * [drop](docs/mouse-events.md#drop) - fired when a drag operation ends
+  * [dropOnFrame](docs/mouse-events.md#drop-on-frame) - fired when a drag operation ends but the cursor is over the frame rather than the content area of the target window
 
 ### Focus Events
   * [focus](docs/events/focus.md) - fired when any interactive widget gets keyboard focus
