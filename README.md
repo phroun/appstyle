@@ -54,22 +54,22 @@ Any time you specify a width or height, or the x or y coordinate of a widget wit
 
 Once you have a Window Class registered you can make a window by calling [appstyle.makeWindow()](docs/makeWindow.md) pass along a list of options. Here are a few examples:
 
-  * **class** - the Window Class for the type of window you'd like to create
-  * **title** - the title of this window
-  * **noCloseBtn** - set this to `true` to remove the close button from the window
-  * titleBar - set this to `false` to remove the title bar of a window (be careful, there's no default way to move a window without a title bar)
-  * toolFrame - set this to `true` to use a smaller title bar and sizer style for this window
-  * x, y - the initial x and y coordinates (in pixels) for this window (from the upper left corner)
-  * w, h - the width and height (in character grid units) for this window
-  * pixel - set this to `true` to specify `w` and `h` as pixels instead of character grid units
-  * charGrid - set thi to `true` to make the character grid visible (useful for debugging!)
-  * charWidth - set this to override the default horizontal spacing of the character grid
-  * charHeight - set this to override the default vertical spacing of the character grid
-  * charOffsetX - set this to override the default horizontal offset of the character grid
-  * charOffsetY - set this to override the default vertical offset of the character grid
-  * horizontalSize - set this to `true` to allow horizontal resizing of this window
-  * verticalSize - set this to `true` to allow vertical resizing of this window
-  * cursor - set this to to a cursor number to change which mouse cursor is displayed when the pointer is over the content area of this window
+  * `class` - the Window Class for the type of window you'd like to create
+  * `title` - the title of this window
+  * `noCloseBtn` - set this to `true` to remove the close button from the window
+  * `titleBar` - set this to `false` to remove the title bar of a window (be careful, there's no default way to move a window without a title bar)
+  * `toolFrame` - set this to `true` to use a smaller title bar and sizer style for this window
+  * `x`, `y` - the initial x and y coordinates (in pixels) for this window (from the upper left corner)
+  * `w`, `h` - the width and height (in character grid units) for this window
+  * `pixel` - set this to `true` to specify `w` and `h` as pixels instead of character grid units
+  * `charGrid` - set thi to `true` to make the character grid visible (useful for debugging!)
+  * `charWidth` - set this to override the default horizontal spacing of the character grid
+  * `charHeight` - set this to override the default vertical spacing of the character grid
+  * `charOffsetX` - set this to override the default horizontal offset of the character grid
+  * `charOffsetY` - set this to override the default vertical offset of the character grid
+  * `horizontalSize` - set this to `true` to allow horizontal resizing of this window
+  * `verticalSize` - set this to `true` to allow vertical resizing of this window
+  * `cursor` - set this to to a cursor number to change which mouse cursor is displayed when the pointer is over the content area of this window
 
 ### Writing your Widget Handler
 
