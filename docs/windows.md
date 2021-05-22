@@ -45,3 +45,6 @@ As a minimum, props should include a field called `class` which specifies which 
   2. horizontal sizer
   3. vertical sizer
   4. diagonal sizer
+
+### Window Manager Events
+  * [close](docs/windows.md#window-manager-events) - fired when the close button in the upper corner of the window is activated
