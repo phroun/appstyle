@@ -103,7 +103,7 @@ function myWindowEvent(win, evt) {
 }
 
 function myWindowWidgets(win) {
-  appstyle.button('myButton', 'Click Me!', {x:0, y:0, w:10});
+  appstyle.button(win, 'myButton', 'Click Me!', {x:0, y:0, w:10});
 }
 
 $(document).ready(function() {
