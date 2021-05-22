@@ -1,3 +1,14 @@
+/*!
+ * appstyle JavaScript Library v1.0.0
+ * https://github.com/phroun/appstyle
+ *
+ * Copyright Jeffrey R. Day and other contributors
+ * Released under the MIT license
+ * https://github.com/phroun/appstyle/blob/main/LICENSE
+ *
+ * Date: 2021-05-22T16:50Z
+ */
+
 var appstyle = (function() {
 
   // ==== Sizing and Fonts ====
