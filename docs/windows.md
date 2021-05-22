@@ -46,5 +46,9 @@ As a minimum, props should include a field called `class` which specifies which 
   3. vertical sizer
   4. diagonal sizer
 
+### Accessing the Window List
+
+Callbacks and event handlers provide you with the appropriate window object directly, but if you ever find yourself with a window id (wid) and need to access the corresponding window object you can do so by using `appstyle.windowList[wid]`.
+
 ### Window Manager Events
   * [close](docs/windows.md#window-manager-events) - fired when the close button in the upper corner of the window is activated
