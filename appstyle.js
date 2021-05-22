@@ -1,5 +1,5 @@
 /*!
- * appstyle JavaScript Library v1.0.1
+ * appstyle JavaScript Library v1.0.2
  * https://github.com/phroun/appstyle
  *
  * Copyright Jeffrey R. Day and other contributors
@@ -85,6 +85,7 @@ var appstyle = (function() {
   var windowClasses = {};
   var eventDispatcher = {};
   var modalCallback = false;
+  var inTouchEvent = false;
 
   function padZ(s) {
     s = s.toString();
@@ -1333,7 +1334,7 @@ var appstyle = (function() {
         txt.addEventListener('change', ev_textchange, false);
         txt.addEventListener('focus', ev_textfocus, false);
         txt.addEventListener('blur', ev_textblur, false);
-        txt.addEventListener('mousemove', ev_mousemove, false);
+        txt.addEventListener('pointermove', ev_mousemove, false);
         txt.addEventListener('pointerup', ev_mouseup, false);
         txt.dataset.init = true;
       }
@@ -1714,11 +1715,16 @@ var appstyle = (function() {
 
   function ev_mousedown(ev) {
     var isRightMB;
-    if ("which" in ev)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-      isRightMB = ev.which == 3; 
-    else if ("button" in ev)  // IE, Opera 
-      isRightMB = ev.button == 2; 
-
+    if (ev.changedTouches) {
+      isRightMB = false;
+      inTouchEvent = true;
+    } else {
+      if ("which" in ev)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+        isRightMB = ev.which == 3; 
+      else if ("button" in ev)  // IE, Opera 
+        isRightMB = ev.button == 2; 
+    }
+    ev_mousemove(ev);
     if (!isRightMB) {
 
       if (mouseOverWid >= 0) {
@@ -1775,10 +1781,11 @@ var appstyle = (function() {
       }
     }
     var c = document.getElementById('myCanvas');
-    if ((!isRightMB) && c.setPointerCapture) {
+    if ((!isRightMB) && ev.pointerId && c.setPointerCapture) {
       c.setPointerCapture(ev.pointerId);
     }
     updateCanvas(c);
+    inTouchEvent = false;
   }
   
   var toggleFullScreen = function() {
@@ -1858,6 +1865,7 @@ var appstyle = (function() {
 
   function ev_mouseup(ev) {
     var isRightMB;
+    ev_mousemove(ev);
     if ("which" in ev)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
       isRightMB = ev.which == 3; 
     else if ("button" in ev)  // IE, Opera 
@@ -1865,7 +1873,7 @@ var appstyle = (function() {
 
     if (!isRightMB) {
       var c = document.getElementById('myCanvas');
-      if (c.releasePointerCapture) {
+      if (c.releasePointerCapture && ev.pointerId) {
         c.releasePointerCapture(ev.pointerId);
       }
       if ((dragdrop.wid >= 0) && (typeof windowList[dragdrop.wid] == "undefined")) {
@@ -1940,22 +1948,27 @@ var appstyle = (function() {
   function ev_mousemove(ev) {
     var c = document.getElementById('myCanvas');
     var x, y;
-
-    if (ev.layerX || ev.layerX == 0) {
-      x = ev.layerX;
-      y = ev.layerY;
-    } else if (ev.offsetX || ev.offsetX == 0) {
-      x = ev.offsetX;
-      y = ev.offsetY;
-    }
-    if (ev.target != c) {
-      x = ev.pageX;
-      y = ev.pageY;
-      inputHideMouse = true;
-    } else {
-      inputHideMouse = false;
-    }
     
+    if (ev.changedTouches) {
+      x = ev.changedTouches[0].pageX;
+      y = ev.changedTouches[0].pageY;
+      inTouchEvent = true;
+    } else {
+      if (ev.layerX || ev.layerX == 0) {
+        x = ev.layerX;
+        y = ev.layerY;
+      } else if (ev.offsetX || ev.offsetX == 0) {
+        x = ev.offsetX;
+        y = ev.offsetY;
+      }
+      if (ev.target != c) {
+        x = ev.pageX;
+        y = ev.pageY;
+        inputHideMouse = true;
+      } else {
+        inputHideMouse = false;
+      }
+    }
     if ((x < 0) || (y < 0)) {
       boundsHideMouse = true;
     } else {
@@ -2027,6 +2040,9 @@ var appstyle = (function() {
         win.h = th;
         win.private.ch = th;
       }
+    }
+    if (inTouchEvent) {
+      updateCanvas(c);
     }
   }
   
@@ -3013,9 +3029,12 @@ var appstyle = (function() {
     options.uiScaleFactor = 0.5;
     document.body.addEventListener('pointerleave', ev_mouseleave, false);
     document.body.addEventListener('pointerenter', ev_mouseenter, false);
-    c.addEventListener('mousemove', ev_mousemove, false);
+    c.addEventListener('pointermove', ev_mousemove, false);
     c.addEventListener('pointerdown', ev_mousedown, false);
     c.addEventListener('pointerup', ev_mouseup, false);
+    c.addEventListener('touchstart', ev_mousedown, { capture: false, passive: true });
+    c.addEventListener('touchmove', ev_mousemove, { capture: false, passive: true });
+    c.addEventListener('touchend', ev_mouseup, false);
     c.addEventListener('dblclick', ev_dblclick, false);
     document.addEventListener('keydown', ev_keydown, false);
     document.addEventListener('keyup', ev_keyup, false);
