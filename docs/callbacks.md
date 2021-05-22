@@ -1,3 +1,5 @@
+[Return to Documentation Index](/README.md)
+
 # Callbacks
 
 ## [Widgets Handler](#widgets-handler)
