@@ -15,14 +15,14 @@ Here's a minimal example of an appstyle app:
 <script src="appstyle.js"></script>
 <script>
 
-  function myWindow(win, ctx) {
+  function myWindowWidgets(win, ctx) {
     appstyle.text(win, 'Hello World', {x: 0, y: 0, w: 20});
   }
 
   $(document).ready(function() {
     appstyle.registerWindowClass('myWindow', {
       title: 'My Window',
-      widgets: myWindow
+      widgets: myWindowWidgets
     });
     appstyle.makeWindow({class: 'myWindow'});
   });
