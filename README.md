@@ -138,11 +138,11 @@ You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Cl
 
 ## Other Helper Functions
 
-  * [appstyle.getMousePos()](docs/getMousePos.md)
-  * [appstyle.getLocalPos()](docs/getLocalPos.md)
-  * [appstyle.getWidgetById()](docs/getWidgetById.md)
-  * [appstyle.getWidgetPos()](docs/getWidgetPos.md)
-  * [appstyle.getCharPos()](docs/getCharPos.md)
-  * [appstyle.getCharFromPos()](docs/getCharFromPos.md)
-  * [appstyle.canWidgetFocus()](docs/canWidgetFocus.md)
-  * [appstyle.isWithinWidget()](docs/isWithinWidget.md)
+  * [appstyle.getMousePos(win)](docs/getMousePos.md) - return an object containing mouse x and y coordinates. if you pass it a window, it will return local window coordinates.
+  * [appstyle.getLocalPos(win, x, y)](docs/getLocalPos.md) - convert a canvas x, y coordinate into a local window coordinate.
+  * [appstyle.getWidgetById(win, widgetId)](docs/getWidgetById.md) - returns the widget object from the current frame's data.
+  * [appstyle.getWidgetPos(win, widget, absolute)](docs/getWidgetPos.md) - if absolute is `true`, returns the position of the widget object within the window, if `false`, returns the position of a nested widget object relative to its parent widget.
+  * [appstyle.getCharPos(win, x, y)](docs/getCharPos.md) - convert a character coordinate into a pixel coordinate
+  * [appstyle.getCharFromPos(win, x, y, truncate)](docs/getCharFromPos.md) - convert a pixel coordinate into a character coordinate. if `truncate` is true, only return integer coordinates.
+  * [appstyle.canWidgetFocus(win, widget)](docs/canWidgetFocus.md) - returns `true` if a widget can receive keyboard input focus.
+  * [appstyle.isWithinWidget(win, widget, x, y, absolute)](docs/isWithinWidget.md) - returns `true` if the specified x and y pixel coordinates are within the coordinates of the specified widget.  if absolute is `true`, the pixel coordinates are local coordinates for the window, and if `false`, they are relative to the specified widget's parent widget.
