@@ -2707,6 +2707,7 @@ var appstyle = (function() {
         }
       }
     }
+    doResize();
     return found;
   }
   
