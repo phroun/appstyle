@@ -118,25 +118,18 @@ $(document).ready(function() {
 });
 ```
 
-### Keyboard Events
-  * [keyDown](docs/keyboard-events.md#key-down) - fired when a keyboard key is pressed down
-  * [keyUp](docs/keyboard-events.md#key-up) - fired when a keyboard key is released
-  * [keyPress](docs/keyboard-events.md#key-press) - fired when a keyboard key is pressed and released, or when the key auto-repeats due to being held down continuously
+Here are some common types of events you can respond to:
 
-### Mouse Events
-  * [mouseDown](docs/mouse-events.md#mouse-down) - fired when the mouse button is pressed down
-  * [mouseUp](docs/mouse-events.md#mouse-up) - fired when the mouse button is released
+  * [keyPress](docs/keyboard-events.md#key-press) - fired when a keyboard key is pressed and released, or when the key auto-repeats due to being held down
   * [click](docs/mouse-events.md#click) - fired when the mouse is released on the same widget where it was pressed down
-  * [dblClick](docs/mouse-events.md#dbl-click) - fired when two clicks happen on the same widget in rapidy successio
-  * [dragFrame](docs/mouse-events.md#drag-frame) - fired when the user begins to move the window by dragging the window's title bar
-  * [dropFrame](docs/mouse-events.md#drop-frame) - fired when the user ends moving a window by way of dragging the window's title bar
-  * [drop](docs/mouse-events.md#drop) - fired when a drag operation ends
-  * [dropOnFrame](docs/mouse-events.md#drop-on-frame) - fired when a drag operation ends but the cursor is over the frame rather than the content area of the target window
-
-### Focus Events
+  * [drop](docs/mouse-events.md#drop) - fired when a drag and drop operation ends
   * [focus](docs/focus.md#focus) - fired when any interactive widget gets keyboard focus
   * [blur](docs/focus.md#blur) - fired when any interactive wiget loses keyboard focus
-  * [focusFirst](docs/focus.md#focus-first) - fired when focus is supposed to go to the first interactive widget
-  * [focusNext](docs/focus.md#focus-next) - fired when focus is supposed to go to the next interactive widget in squence
-  * [focusPrior](docs/focus.md#focus-prior) - fired when focus is supposed to go to the prior interactive widget in sequence
-  * [focusLast](docs/focus.md#focus-last) - fired when focus is supposed to go to the last interactive widget in sequence
+
+For a comprehensive list of Events, see the [Documentation Index](docs/README.md)
+
+## Congratulations!
+
+You're now writing programs with appstyle!
+
+For further details, see the [Documentation Index](docs/README.md)
