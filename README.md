@@ -33,7 +33,7 @@ Here's a minimal example of an appstyle app:
 
 # Concepts
 
-### Window Classes
+### Using Window Classes to define Callback Functions
 
 When you use [appstyle.registerWindowClass()](docs/registerWindowClass.md) you get to specify some callbacks that let you define and override functionality of an appstyle window:
 
@@ -59,8 +59,10 @@ Once you have a Window Class registered you can make a window by calling [appsty
   * `noCloseBtn` - set this to `true` to remove the close button from the window
   * `titleBar` - set this to `false` to remove the title bar of a window (be careful, there's no default way to move a window without a title bar)
   * `toolFrame` - set this to `true` to use a smaller title bar and sizer style for this window
+  * `neverRaise` - set this to `true` to prevent a window from automatically raising to the top when it receives focus.
   * `x`, `y` - the initial x and y coordinates (in pixels) for this window (from the upper left corner)
   * `w`, `h` - the width and height (in character grid units) for this window
+  * `z` - the current z-order of this window. higher numnbers show on top of lower numbers. these get frequently re-enumerated.
   * `pixel` - set this to `true` to specify `w` and `h` as pixels instead of character grid units
   * `charGrid` - set thi to `true` to make the character grid visible (useful for debugging!)
   * `charWidth` - set this to override the default horizontal spacing of the character grid
@@ -116,3 +118,15 @@ You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Cl
   * [focusNext](docs/events/focusNext.md) - fired when focus is supposed to go to the next interactive widget in squence
   * [focusPrior](docs/events/focusPrior.md) - fired when focus is supposed to go to the prior interactive widget in sequence
   * [focusLast](docs/events/focusLast.md) - fired when focus is supposed to go to the last interactive widget in sequence
+
+## Window Classes in the standard library:
+
+  * `appstyle.debugger` - An inspector/debugger tool window.
+
+## Mouse Cursor Numbers
+
+  0 - pointer (arrow)
+  1 - crosshair
+  2 - horizontal sizer
+  3 - vertical sizer
+  4 - diagonal sizer
