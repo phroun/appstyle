@@ -2997,11 +2997,10 @@ $(document).ready(function() {
     requestUpload: requestUpload,
 
     // widgets:
-    custom: custom,
     text: text,
     textInput: textInput,
-    pane: pane,
     button: button,
+    custom: custom,
 
     // other things
     windowList: windowList,
