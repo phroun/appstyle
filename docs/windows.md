@@ -2,7 +2,7 @@
 
 # Window Management
 
-## [appstyle.registerWindowClass(className, props)](#register-window-class)
+## appstyle.registerWindowClass(className, props)
 
 When you use appstyle.registerWindowClass() you get to specify some callbacks that let you define and override functionality of an appstyle window:
 
@@ -13,7 +13,7 @@ When you use appstyle.registerWindowClass() you get to specify some callbacks th
 
 In addition to callbacks, you can also specify whatever other default options you would like windows of this class to have. If you plan to share your Window Classes with other developers, choose a Class Name that is prefixed with a vendor identifier.  We use "appstyle." to prefix Window Classes provided by the appstyle library.
 
-## [appstyle.makeWindow(props)](#make-window)
+## appstyle.makeWindow(props)]
 
 As a minimum, props should include a field called `class` which specifies which Window Class to apply to the window being created.
 
