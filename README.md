@@ -38,7 +38,7 @@ Here's a minimal example of an appstyle app:
 When you use [appstyle.registerWindowClass()](docs/registerWindowClass.md) you get to specify some callbacks that let you define and override functionality of an appstyle window:
 
   * [widgets](docs/callbacks/widgets.md) - this defines the layout of a window
-  * [events](docs/callbacks/event.md) - this lets you respond to things such as user interaction (buttons being clicked, etc.)
+  * [event](docs/callbacks/event.md) - this lets you respond to things such as user interaction (buttons being clicked, etc.)
   * [paint](docs/callbacks/paint.md) - for changing the behavior of a how a window is painted.
   * [paintPane](docs/callbacks/paintPane.md) - for changing the behavior of how a pane is painted.
 
