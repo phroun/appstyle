@@ -15,8 +15,6 @@
 
 ### Widget Library
 
-# Widgets
-
 * [text](widgets/README.md#text)
 * [textInput](widgets/README.md#text-input)
 * [button](widgets/README.md#button)
