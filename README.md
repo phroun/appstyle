@@ -64,7 +64,7 @@ Once you have a Window Class registered you can make a window by calling [appsty
 
 ### Writing your Widget Handler
 
-The Widget Handler for a window gets called every time the screen is painted. Its purpose is to generate the list of widgets that will be used to respond to mouse input and to paint the window.
+The [Widget Handler](docs/WidgetHandler.md) for a window gets called every time the screen is painted. Its purpose is to generate the list of widgets that will be used to respond to mouse input and to paint the window.
 
 The default paint handler is sufficient to show most of the available stock widgets, so to make a nice looking window, all you usually need to do is write the Widget Handler.
 
@@ -78,3 +78,6 @@ Generally speaking, Widgets will be painted in the order they are defined, so if
   * [appstyle.pane](docs/pane.md) - A container to hold other widgets. Supports scrolling.
   * [appstyle.custom](docs/custom.md) - Any other widget. You'll need to provide your own painting and event handlers.
 
+### Responding to Events
+
+You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Class in order to respond to events.
