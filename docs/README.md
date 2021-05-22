@@ -9,3 +9,5 @@
  * [Keyboard Events](keyboard-events.md)
  * [Mouse Events](mouse-events.md)
  * [Focus](focus.md)
+ * [Auxiliary Function](auxiliary-functions.md)
+ * [Helper Functions](helper-functions.md)
