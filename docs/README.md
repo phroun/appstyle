@@ -24,11 +24,3 @@
 ## Window Classes in the standard library:
 
   * `appstyle.debugger` - An inspector/debugger tool window.
-
-## Mouse Cursor Numbers
-
-  0. pointer (arrow)
-  1. crosshair
-  2. horizontal sizer
-  3. vertical sizer
-  4. diagonal sizer
