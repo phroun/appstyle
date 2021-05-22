@@ -37,16 +37,16 @@ Here's a minimal example of an appstyle app:
 
 When you use [appstyle.registerWindowClass()](docs/registerWindowClass.md) you get to specify some callbacks that let you define and override functionality of an appstyle window:
 
-  * widgets - this defines the layout of a window
-  * events - this lets you respond to things such as user interaction (buttons being clicked, etc.)
-  * paint - for changing the behavior of a how a window is painted.
-  * paintPane - for changing the behavior of how a pane is painted.
+  * [widgets](docs/callbacks/widgets.md) - this defines the layout of a window
+  * [events](docs/callbacks/event.md) - this lets you respond to things such as user interaction (buttons being clicked, etc.)
+  * [paint](docs/callbacks/paint.md) - for changing the behavior of a how a window is painted.
+  * [paintPane](docs/callbacks/paintPane.md) - for changing the behavior of how a pane is painted.
 
 In addition to callbacks, you can also specify whatever other default options you would like windows of this class to have. If you plan to share your Window Classes with other developers, choose a Class Name that is prefixed with a vendor identifier.  We use "appstyle." to prefix Window Classes provided by the appstyle library.
 
 ### The Character Grid
 
-Although you can use pixels to place and position everything, we provide a ["Character Grid"](docs/CharacterGrid.md) to help make window layout easier, and to make programming more akin to the text-mode development common on computers of the 1980s.
+Although you can use pixels to place and position everything, we provide a "[Character Grid](docs/CharacterGrid.md)" to help make window layout easier, and to make programming more akin to the text-mode development common on computers of the 1980s.
 
 Any time you specify a width or height, or the x or y coordinate of a widget within a window, you can use this system. The coordinates do not need to be whole numbers, so if you want to place something half way between line 1 and 2, just use 1.5.  If you find the need to use pixel sizing and placement for a specific widget, we have an option to do this as well.
 
