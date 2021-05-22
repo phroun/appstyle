@@ -14,7 +14,7 @@ This is a heavy geometry refresh of the entire canvas. It checks the current bro
 
 ### appstyle.internals.getEnvironment()
 
-This returns the current environment as an object.
+This returns the current environment as an object. An environment includes all current windows, with their properties and storage objects. It will not include temporary values, internal geometry values, or any properties whose value is equivalent to the default value for the given Window Class.
 
 ### appstyle.internals.setEnvironment(env)
 
