@@ -1,4 +1,4 @@
-[Return to Documentationn Index](/docs/README.md)
+[Return to Documentation Index](/docs/README.md)
 
 # Keyboard Events
 
