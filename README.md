@@ -131,6 +131,18 @@ You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Cl
   3. vertical sizer
   4. diagonal sizer
 
-## Other Helper Functions
+## Auxiliary Functions
 
   * [appstyle.requestUpload()](docs/requestUpload.md) - this prompts the user to upload a file into the browser's localStorage.  be aware, the total size of localStorage for each site/domain is very limited (last I heard, about 5 megabytes in Firefox and 10 in Chrome.)
+  * [appstyle.toggleFullScreen()](docs/toggleFullScreen.md) - try to toggle fullscreen mode for the browser.  this is also the default action for double clicking the backdrop (if the backdrop is visible.)
+
+## Other Helper Functions
+
+  * [appstyle.getMousePos()](docs/getMousePos.md)
+  * [appstyle.getLocalPos()](docs/getLocalPos.md)
+  * [appstyle.getWidgetById()](docs/getWidgetById.md)
+  * [appstyle.getWidgetPos()](docs/getWidgetPos.md)
+  * [appstyle.getCharPos()](docs/getCharPos.md)
+  * [appstyle.getCharFromPos()](docs/getCharFromPos.md)
+  * [appstyle.canWidgetFocus()](docs/canWidgetFocus.md)
+  * [appstyle.isWithinWidget()](docs/isWithinWidget.md)
