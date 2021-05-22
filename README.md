@@ -77,7 +77,7 @@ Once you have a Window Class registered you can make a window by calling [appsty
 
 ## Writing your Widget Handler
 
-The [Widget Handler](docs/WidgetHandler.md) for a window gets called every time the screen is painted. Its purpose is to generate the list of widgets that will be used to respond to mouse input and to paint the window.
+The [Widget Handler](docs/callbacks.md#widgets-handler) for a window gets called every time the screen is painted. Its purpose is to generate the list of widgets that will be used to respond to mouse input and to paint the window.
 
 The default paint handler is sufficient to show most of the available stock widgets, so to make a nice looking window, all you usually need to do is write the Widget Handler.
 
@@ -93,7 +93,7 @@ Generally speaking, Widgets will be painted in the order they are defined, so if
 
 ## Responding to Events
 
-You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Class in order to respond to events.  Here is a small example:
+You'll need to write an [Event Handler](docs/callbacks.md#event-handler) for your Window Class in order to respond to events.  Here is a small example:
 
 ```js
 function myWindowEvent(win, evt) {
@@ -144,7 +144,7 @@ $(document).ready(function() {
 
 ## Custom Painting
 
-If you add a [Paint Handler](docs/PaintHandler.md) to your Window Class, you'll be passed the window object and a 2D canvas drawing context. The standard library has some functions that you can call manually which are normally part of the default paint handler:
+If you add a [Paint Handler](docs/callbacks.md#paint-handler) to your Window Class, you'll be passed the window object and a 2D canvas drawing context. The standard library has some functions that you can call manually which are normally part of the default paint handler:
 
   * [appstyle.drawBackground](docs/drawing.md#draw-background) - This paints the background of the window. If you don't call this, or paint the background area yourself, the window will be see-through.
   * [appstyle.drawWidgets](docs/drawing.md#draw-widgets) - This paints all of the widgets on the window.
