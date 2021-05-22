@@ -85,11 +85,11 @@ Generally speaking, Widgets will be painted in the order they are defined, so if
 
 ### Widgets included in the standard library:
 
-  * [appstyle.text](docs/text.md) - Shows some text. (Limited to a single line.)
-  * [appstyle.textInput](docs/textInput.md) - Allows the user to input text. This currently has some limitations because it falls back to the HTML DOM when it is focused.
-  * [appstyle.button](docs/button.md) - A pushbutton the user can click to trigger some sort of action.
-  * [appstyle.pane](docs/pane.md) - A container to hold other widgets. Supports scrolling.
-  * [appstyle.custom](docs/custom.md) - Any other widget. You'll need to provide your own painting and event handlers.
+  * [appstyle.text(win, caption, props)](docs/text.md) - Shows some text. (Limited to a single line.)
+  * [appstyle.textInput(win, storage, defaultValue, props)](docs/textInput.md) - Allows the user to input text. This currently has some limitations because it falls back to the HTML DOM when it is focused.
+  * [appstyle.button(win, id, caption, props)](docs/button.md) - A pushbutton the user can click to trigger some sort of action.
+  * [appstyle.pane(win, storage, props)](docs/pane.md) - A container to hold other widgets. Supports scrolling.
+  * [appstyle.custom(win, className, props)](docs/custom.md) - Any other widget. You'll need to provide your own painting and event handlers.
 
 ## Responding to Events
 
