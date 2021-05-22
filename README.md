@@ -83,27 +83,27 @@ Generally speaking, Widgets will be painted in the order they are defined, so if
 You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Class in order to respond to events.
 
 #### Window Manager Events
-  * [close](docs/events/close.md)
+  * [close](docs/events/close.md) - fired when the close button in the upper corner of the window is activated
 
 #### Mouse Evnts
-  * [mouseDown](docs/events/mouseDown.md)
-  * [mouseUp](docs/events/mouseUp.md)
-  * [click](docs/events/click.md)
-  * [dblClick](docs/events/dblClick.md)
-  * [dragFrame](docs/events/dragFrame.md)
-  * [dropFrame](docs/events/dropFrame.md)
-  * [drop](docs/events/drop.md)
-  * [dropOnFrame](docs/events/dropOnFrame.md)
+  * [mouseDown](docs/events/mouseDown.md) - fired when the mouse button is pressed down
+  * [mouseUp](docs/events/mouseUp.md) - fired when the mouse button is released
+  * [click](docs/events/click.md) - fired when the mouse is released on the same widget where it was pressed down
+  * [dblClick](docs/events/dblClick.md) - fired when two clicks happen on the same widget in rapidy successio
+  * [dragFrame](docs/events/dragFrame.md) - fired when the user begins to move the window by dragging the window's title bar
+  * [dropFrame](docs/events/dropFrame.md) - fired when the user ends moving a window by way of dragging the window's title bar
+  * [drop](docs/events/drop.md) - fired when a drag operation ends
+  * [dropOnFrame](docs/events/dropOnFrame.md) - fired when a drag operation ends but the cursor is over the frame rather than the content area of the target window
 
 #### Focus Events
-  * [focusNext](docs/events/focusNext.md)
-  * [focusPrior](docs/events/focusPrior.md)
-  * [focusFirst](docs/events/focusFirst.md)
-  * [focusLast](docs/events/focusLast.md)
-  * [focus](docs/events/focus.md)
-  * [blur](docs/events/blur.md)
+  * [focus](docs/events/focus.md) - fired when any interactive widget gets keyboard focus
+  * [blur](docs/events/blur.md) - fired when any interactive wiget loses keyboard focus
+  * [focusFirst](docs/events/focusFirst.md) - fired when focus is supposed to go to the first interactive widget
+  * [focusNext](docs/events/focusNext.md) - fired when focus is supposed to go to the next interactive widget in squence
+  * [focusPrior](docs/events/focusPrior.md) - fired when focus is supposed to go to the prior interactive widget in sequence
+  * [focusLast](docs/events/focusLast.md) - fired when focus is supposed to go to the last interactive widget in sequence
 
 #### Keyboard Events
-  * [keyDown](docs/events/keyDown.md)
-  * [keyUp](docs/events/keyUp.md)
-  * [keyPress](docs/events/keyPress.md)
+  * [keyDown](docs/events/keyDown.md) - fired when a keyboard key is pressed down
+  * [keyUp](docs/events/keyUp.md) - fired when a keyboard key is released
+  * [keyPress](docs/events/keyPress.md) - fired when a keyboard key is pressed and released, or when the key auto-repeats due to being held down continuously
