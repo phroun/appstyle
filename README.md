@@ -44,13 +44,13 @@ When you use [appstyle.registerWindowClass()](docs/registerWindowClass.md) you g
 
 In addition to callbacks, you can also specify whatever other default options you would like windows of this class to have. If you plan to share your Window Classes with other developers, choose a Class Name that is prefixed with a vendor identifier.  We use "appstyle." to prefix Window Classes provided by the appstyle library.
 
-### The Character Grid
+## The Character Grid vs. Pixel Coordinates
 
 Although you can use pixels to place and position everything, we provide a "[Character Grid](docs/CharacterGrid.md)" to help make window layout easier, and to make programming more akin to the text-mode development common on computers of the 1980s.
 
 Any time you specify a width or height, or the x or y coordinate of a widget within a window, you can use this system. The coordinates do not need to be whole numbers, so if you want to place something half way between line 1 and 2, just use 1.5.  If you find the need to use pixel sizing and placement for a specific widget, we have a "[Pixel Mode](docs/PixelMode.md)" option to do this as well.
 
-### Creating Windows
+## Creating Windows
 
 Once you have a Window Class registered you can make a window by calling [appstyle.makeWindow()](docs/makeWindow.md) pass along a list of options. Here are a few examples:
 
@@ -73,7 +73,7 @@ Once you have a Window Class registered you can make a window by calling [appsty
   * `verticalSize` - set this to `true` to allow vertical resizing of this window
   * `cursor` - set this to to a cursor number to change which mouse cursor is displayed when the pointer is over the content area of this window
 
-### Writing your Widget Handler
+## Writing your Widget Handler
 
 The [Widget Handler](docs/WidgetHandler.md) for a window gets called every time the screen is painted. Its purpose is to generate the list of widgets that will be used to respond to mouse input and to paint the window.
 
@@ -81,7 +81,7 @@ The default paint handler is sufficient to show most of the available stock widg
 
 Generally speaking, Widgets will be painted in the order they are defined, so if you want something to overlap something else, define it after the Widget it needs to go on top of.
 
-#### Widgets included in the standard library:
+### Widgets included in the standard library:
 
   * [appstyle.text](docs/text.md) - Shows some text. (Limited to a single line.)
   * [appstyle.textInput](docs/textInput.md) - Allows the user to input text. This currently has some limitations because it falls back to the HTML DOM when it is focused.
@@ -89,19 +89,19 @@ Generally speaking, Widgets will be painted in the order they are defined, so if
   * [appstyle.pane](docs/pane.md) - A container to hold other widgets. Supports scrolling.
   * [appstyle.custom](docs/custom.md) - Any other widget. You'll need to provide your own painting and event handlers.
 
-### Responding to Events
+## Responding to Events
 
 You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Class in order to respond to events.
 
-#### Window Manager Events
+### Window Manager Events
   * [close](docs/events/close.md) - fired when the close button in the upper corner of the window is activated
 
-#### Keyboard Events
+### Keyboard Events
   * [keyDown](docs/events/keyDown.md) - fired when a keyboard key is pressed down
   * [keyUp](docs/events/keyUp.md) - fired when a keyboard key is released
   * [keyPress](docs/events/keyPress.md) - fired when a keyboard key is pressed and released, or when the key auto-repeats due to being held down continuously
 
-#### Mouse Events
+### Mouse Events
   * [mouseDown](docs/events/mouseDown.md) - fired when the mouse button is pressed down
   * [mouseUp](docs/events/mouseUp.md) - fired when the mouse button is released
   * [click](docs/events/click.md) - fired when the mouse is released on the same widget where it was pressed down
@@ -111,13 +111,23 @@ You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Cl
   * [drop](docs/events/drop.md) - fired when a drag operation ends
   * [dropOnFrame](docs/events/dropOnFrame.md) - fired when a drag operation ends but the cursor is over the frame rather than the content area of the target window
 
-#### Focus Events
+### Focus Events
   * [focus](docs/events/focus.md) - fired when any interactive widget gets keyboard focus
   * [blur](docs/events/blur.md) - fired when any interactive wiget loses keyboard focus
   * [focusFirst](docs/events/focusFirst.md) - fired when focus is supposed to go to the first interactive widget
   * [focusNext](docs/events/focusNext.md) - fired when focus is supposed to go to the next interactive widget in squence
   * [focusPrior](docs/events/focusPrior.md) - fired when focus is supposed to go to the prior interactive widget in sequence
   * [focusLast](docs/events/focusLast.md) - fired when focus is supposed to go to the last interactive widget in sequence
+
+## Custom Painting
+
+If you add a [Paint Handler](docs/PaintHandler.md) to your Window Class, you'll be passed the window object and a 2D canvas drawing context. The standard library has some functions that you can call manually which are normally part of the default paint handler:
+
+  * [appstyle.drawBackground](docs/drawBackground.md) - This paints the background of the window. If you don't call this, or paint the background area yourself, the window will be see-through.
+  * [appstyle.drawWidgets](docs/drawWidgets.md) - This paints all of the widgets on the window.
+  * [appstyle.drawText](docs/drawText.md) - This paints text onto the canvas in the same way the default widgets do.
+  * [appstyle.drawFlatOutline](docs/drawFlatOutline.md) - This draws a flat colored outline surrounding a rectangular area.
+  * [appstyle.drawBevel](docs/drawBevel.md) - This draws a beveled outline surrounding a rectangular area.
 
 ## Window Classes in the standard library:
 
