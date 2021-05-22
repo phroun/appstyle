@@ -125,8 +125,8 @@ You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Cl
 
 ## Mouse Cursor Numbers
 
-  0 - pointer (arrow)
-  1 - crosshair
-  2 - horizontal sizer
-  3 - vertical sizer
-  4 - diagonal sizer
+  0. pointer (arrow)
+  1. crosshair
+  2. horizontal sizer
+  3. vertical sizer
+  4. diagonal sizer
