@@ -130,3 +130,7 @@ You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Cl
   2. horizontal sizer
   3. vertical sizer
   4. diagonal sizer
+
+## Other Helper Functions
+
+  * [appstyle.requestUpload()](docs/requestUpload.md) - this prompts the user to upload a file into the browser's localStorage.  be aware, the total size of localStorage for each site/domain is very limited (last I heard, about 5 megabytes in Firefox and 10 in Chrome.)
