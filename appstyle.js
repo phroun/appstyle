@@ -2118,6 +2118,7 @@ var appstyle = (function() {
     }
     win.private.widgets.push(o);
   }
+
   var textLn = function(win, caption, props) {
     var o = {
       id: "",
@@ -2135,6 +2136,34 @@ var appstyle = (function() {
     win.private.widgets.push(o);
     win.private.defaultProps.y = o.y + 1;
     win.private.defaultProps.x = 0;
+  }
+  
+  var pane = function(win, storage, props) {
+    var o = {
+      id: storage,
+      class: 'pane',
+      x: 20,
+      y: 20,
+      w: 300,
+      h: 200,
+      pixel:true,
+      storage: storage
+    };
+    addPropsToObject(o, win.private.defaultProps);
+    addPropsToObject(o, props);
+    if (typeof o.x == "undefined") {
+      o.x = 0;
+    }
+    if (typeof o.y == "undefined") {
+      o.y = 0;
+    }
+    if (typeof o.h == "undefined") {
+      o.h = win.h;
+    }
+    if (typeof o.w == "undefined") {
+      o.w = win.w;
+    }
+    win.private.widgets.push(o);
   }
 
   var button = function(win, id, caption, props) {
@@ -3000,6 +3029,7 @@ $(document).ready(function() {
     text: text,
     textInput: textInput,
     button: button,
+    pane: pane,
     custom: custom,
 
     // other things
