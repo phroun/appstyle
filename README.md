@@ -37,7 +37,7 @@ Note: If you want your code to run without dependency on Internet access, you sh
 
 ### Using Window Classes to define Callback Functions
 
-When you use [appstyle.registerWindowClass()](docs/registerWindowClass.md) you get to specify some callbacks that let you define and override functionality of an appstyle window:
+When you use [appstyle.registerWindowClass()](docs/windows.md#register-window-class) you get to specify some callbacks that let you define and override functionality of an appstyle window:
 
   * [widgets(win)](docs/callbacks.md#widgets-handler) - this defines the layout of a window
   * [event(win, evt)](docs/callbacks.md#event-handler) - this lets you respond to things such as user interaction (buttons being clicked, etc.)
@@ -54,7 +54,7 @@ Any time you specify a width or height, or the x or y coordinate of a widget wit
 
 ## Creating Windows
 
-Once you have a Window Class registered you can make a window by calling [appstyle.makeWindow()](docs/makeWindow.md) pass along a list of options. Here are a few examples:
+Once you have a Window Class registered you can make a window by calling [appstyle.makeWindow()](docs/windows.md#make-window) pass along a list of options. Here are a few examples:
 
   * `class` - the Window Class for the type of window you'd like to create
   * `title` - the title of this window
