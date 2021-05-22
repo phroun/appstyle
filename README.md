@@ -31,6 +31,8 @@ Here's a minimal example of an appstyle app:
 </head>
 ```
 
+Note: If you want your code to run without dependency on Internet access, you should download jquery and reference it locally with `<script src="jquery-3.6.0.min.js"></script>` instead of loading it from a CDN.
+
 # Concepts
 
 ### Using Window Classes to define Callback Functions
