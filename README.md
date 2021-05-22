@@ -7,7 +7,7 @@ Currently jQuery is required, and needs to be loaded first. The dependency on jQ
 
 Here's a minimal example of an appstyle app:
 
-```
+```html
 <!DOCTYPE html>
 <head>
 <title>Minimal Appstyle Example</title>
