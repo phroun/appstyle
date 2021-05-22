@@ -57,16 +57,16 @@ var appstyle = (function() {
   var minScaleFactor = 0.25;
   var toolFrameSize = 0.73;
   var halfPixel = true;
-  var mouseOverWin = -1;
-  var windowMouseCapture = -1;
-  var focusWindow = -1;
+  var mouseOverWid = -1;
+  var mouseCaptureWid = -1;
+  var focusWid = -1;
   var dragdrop = {wid: -1};
   var focusWidget = getWidgetReference(false, -1);
   var focusWidgetLoading = false;
   var focusWidgetStorage = '';
   var inputHideMouse = false;
   var boundsHideMouse = false;
-  var lastFocusWin = -1;
+  var lastFocusWid = -1;
   var lastFocusId = -1;
   var panelDepth = 0;
   var windowList = [];
@@ -209,11 +209,11 @@ var appstyle = (function() {
     return({
       x: x - (win.private.cx + 1),
       y: y - (win.private.cy + Math.floor(win.private.titleBarHeight) + 1)
-    });;
+    });
   });
   
   var triggerEvent = function(win, evt) {
-    var evid = win.private.id + ':' + evt.type;
+    var evid = win.private.wid + ':' + evt.type;
     var r = true;
     if (typeof eventDispatcher[evid] == "undefined") {
       eventDispatcher[evid] = true;
@@ -490,7 +490,7 @@ var appstyle = (function() {
     if (!win) {
       ref.wid = -1;
     } else {
-      ref.wid = win.private.id;
+      ref.wid = win.private.wid;
     }
     if (win && (widgetIndex >= 0)) {
       var widget = win.private.widgets[widgetIndex];
@@ -1153,7 +1153,7 @@ var appstyle = (function() {
     var buckets = [];
     for (i=0; i < windowList.length; i++) {
       processWindowMetrics(windowList[i]);
-      windowList[i].private.id = i;
+      windowList[i].private.wid = i;
       if (typeof buckets['z' + padZ(windowList[i].z)] == "undefined") {
         buckets['z' + padZ(windowList[i].z)] = [];
         buckets['z' + padZ(windowList[i].z)].push(i);
@@ -1162,7 +1162,7 @@ var appstyle = (function() {
     }
     keys.sort();
     
-    mouseOverWin = -1;
+    mouseOverWid = -1;
     var lk = -1;
     
     for (i=0; i < keys.length; i++) {
@@ -1181,15 +1181,15 @@ var appstyle = (function() {
             && (mouseY < windowList[wid].private.cy + windowList[wid].private.h+2 +
             windowList[wid].private.titleBarHeight +
             windowList[wid].private.vSizer)) {
-              mouseOverWin = wid;
+              mouseOverWid = wid;
             }
           }
         }
       }
     }
     
-    if (mouseOverWin >= 0) {
-      windowList[mouseOverWin].private.mouseInFlag = true;
+    if (mouseOverWid >= 0) {
+      windowList[mouseOverWid].private.mouseInFlag = true;
     }
 
     var lk = -1;
@@ -1216,16 +1216,16 @@ var appstyle = (function() {
     var focused = document.activeElement;
     if (focused) {
       if (focused.id == 'focus_first') {
-        if (focusWindow != -1) {
-          var r = triggerEvent(windowList[focusWindow], {type:'focusFirst'});
+        if (focusWid != -1) {
+          var r = triggerEvent(windowList[focusWid], {type:'focusFirst'});
           if (r) {
             var found = false;
-            var widg = windowList[focusWindow].private.widgets;
+            var widg = windowList[focusWid].private.widgets;
             for (var i=0;i < widg.length;i++) {
-              if (canWidgetFocus(windowList[focusWindow], widg[i])) {
+              if (canWidgetFocus(windowList[focusWid], widg[i])) {
                 // set focus
-                windowList[focusWindow].private.focusWidget = getWidgetReference(windowList[focusWindow], i);
-                windowList[focusWindow].private.focusWidgetWait = true;
+                windowList[focusWid].private.focusWidget = getWidgetReference(windowList[focusWid], i);
+                windowList[focusWid].private.focusWidgetWait = true;
                 break;
               }
             }
@@ -1233,39 +1233,39 @@ var appstyle = (function() {
         }
       }
       if (focused.id == 'focus_last') {
-        if (focusWindow != -1) {
-          var r = triggerEvent(windowList[focusWindow], {type:'focusLast'});
+        if (focusWid != -1) {
+          var r = triggerEvent(windowList[focusWid], {type:'focusLast'});
           if (r) {
             var found = false;
-            var widg = windowList[focusWindow].private.widgets;
+            var widg = windowList[focusWid].private.widgets;
             for (var i=widg.length-1;i>=0;i--) {
-              if (canWidgetFocus(windowList[focusWindow], widg[i])) {
+              if (canWidgetFocus(windowList[focusWid], widg[i])) {
                 // set focus
-                windowList[focusWindow].private.focusWidget = getWidgetReference(windowList[focusWindow], i);
-                windowList[focusWindow].private.focusWidgetWait = true;
+                windowList[focusWid].private.focusWidget = getWidgetReference(windowList[focusWid], i);
+                windowList[focusWid].private.focusWidgetWait = true;
                 break;
               }
             }
           }
         }
       }
-      if (focusWindow == lastFocusWin) {
+      if (focusWid == lastFocusWid) {
         if (focused.id == 'focus_pre') {
           document.activeElement.blur();
           var lfe = lastFocusId;
-          var r = triggerEvent(windowList[lastFocusWin], {type:'focusPrior', last: lastFocusId});
+          var r = triggerEvent(windowList[lastFocusWid], {type:'focusPrior', last: lastFocusId});
           // go to previous element
           if (r) {
             var found = false;
             var drop = true;
-            var widg = windowList[lastFocusWin].private.widgets;
+            var widg = windowList[lastFocusWid].private.widgets;
             for (var i=widg.length-1;i>=0;i--) {
               if (found) {
-                if (canWidgetFocus(windowList[lastFocusWin], widg[i])) {
+                if (canWidgetFocus(windowList[lastFocusWid], widg[i])) {
                   drop = false;
                   // set focus
-                  windowList[lastFocusWin].private.focusWidget = getWidgetReference(windowList[lastFocusWin], i);
-                  windowList[lastFocusWin].private.focusWidgetWait = true;
+                  windowList[lastFocusWid].private.focusWidget = getWidgetReference(windowList[lastFocusWid], i);
+                  windowList[lastFocusWid].private.focusWidgetWait = true;
                   break;
                 }
               }
@@ -1281,19 +1281,19 @@ var appstyle = (function() {
         if (focused.id == 'focus_post') {
           document.activeElement.blur();
           var lfe = lastFocusId;
-          var r = triggerEvent(windowList[lastFocusWin], {type:'focusNext', last: lastFocusId});
+          var r = triggerEvent(windowList[lastFocusWid], {type:'focusNext', last: lastFocusId});
           // go to next element
           if (r) {
             var found = false;
             var drop = true;
-            var widg = windowList[lastFocusWin].private.widgets;
+            var widg = windowList[lastFocusWid].private.widgets;
             for (var i=0;i < widg.length;i++) {
               if (found) {
-                if (canWidgetFocus(windowList[lastFocusWin], widg[i])) {
+                if (canWidgetFocus(windowList[lastFocusWid], widg[i])) {
                   drop = false;
                   // set focus
-                  windowList[lastFocusWin].private.focusWidget = getWidgetReference(windowList[lastFocusWin], i);
-                  windowList[lastFocusWin].private.focusWidgetWait = true;
+                  windowList[lastFocusWid].private.focusWidget = getWidgetReference(windowList[lastFocusWid], i);
+                  windowList[lastFocusWid].private.focusWidgetWait = true;
                   break;
                 }
               }
@@ -1354,15 +1354,15 @@ var appstyle = (function() {
 
     drawWindowStack(c, ctx);
 
-    if (((dragdrop.wid == mouseOverWin) || (dragdrop.wid == -1)) && (mouseOverWin != -1)) {
-      var win = windowList[mouseOverWin];
+    if (((dragdrop.wid == mouseOverWid) || (dragdrop.wid == -1)) && (mouseOverWid != -1)) {
+      var win = windowList[mouseOverWid];
       if ((win.private.mouseElement.class == 'titleBar')
       || (win.private.mouseElement.class == 'windowBorder')
       || (win.private.mouseElement.class == 'hSizer')
       || (win.private.mouseElement.class == 'vSizer')
       || (win.private.mouseElement.class == 'xSizer')
       || (win.private.mouseElement.class == 'closeBtn')) {
-        if ((dragdrop.wid == -1) || (dragdrop.wid == mouseOverWin)) {
+        if ((dragdrop.wid == -1) || (dragdrop.wid == mouseOverWid)) {
           cursorType = 0;
           if (win.private.mouseElement.class == 'hSizer') {
             cursorType = 2;
@@ -1630,14 +1630,14 @@ var appstyle = (function() {
 
   var bringToTop = function(wid, force) {
     var forceTop = force || false;
-    var needFocus = (focusWindow != wid);
+    var needFocus = (focusWid != wid);
     if (forceTop || needFocus) {
-      if ((focusWindow != -1)
-      && (typeof windowList[focusWindow] != "undefined")) {
-        windowList[focusWindow].private.active = false;
-        triggerEvent(windowList[focusWindow], {type: 'blur'});
+      if ((focusWid != -1)
+      && (typeof windowList[focusWid] != "undefined")) {
+        windowList[focusWid].private.active = false;
+        triggerEvent(windowList[focusWid], {type: 'blur'});
       }
-      focusWindow = -1;
+      focusWid = -1;
       if ((wid >= 0) && (windowList[wid])) {
         var neverRaise = windowList[wid].neverRaise;
         if (typeof neverRaised == "undefined") {
@@ -1646,10 +1646,10 @@ var appstyle = (function() {
         if (forceTop || (!neverRaise)) {
           windowList[wid].z = 1000;
         }
-        focusWindow = wid;
+        focusWid = wid;
         windowList[wid].private.active = true;
         if (needFocus) {
-          triggerEvent(windowList[focusWindow], {type: 'focus'});
+          triggerEvent(windowList[focusWid], {type: 'focus'});
         }
       }
     }
@@ -1673,9 +1673,9 @@ var appstyle = (function() {
 
     if (!isRightMB) {
 
-      if (mouseOverWin >= 0) {
-        bringToTop(mouseOverWin);
-        var win = windowList[mouseOverWin];
+      if (mouseOverWid >= 0) {
+        bringToTop(mouseOverWid);
+        var win = windowList[mouseOverWid];
         if (win.private.mouseElement.class == 'window') {
           win.private.focusWidget = getWidgetReference(win, -1);
           win.private.focusWidgetWait = false;
@@ -1685,9 +1685,9 @@ var appstyle = (function() {
           win.private.focusWidgetWait = true;
         } else {
           if (win.private.mouseElement.class != '') {
-            dragdrop.wid = mouseOverWin;
+            dragdrop.wid = mouseOverWid;
             $('body').addClass('dragging');
-            windowList[mouseOverWin].private.dragdrop = true;
+            windowList[mouseOverWid].private.dragdrop = true;
             dragdrop.source = win.private.mouseElement;
             dragdrop.ox = win.private.cx;
             dragdrop.oy = win.private.cy;
@@ -1713,15 +1713,15 @@ var appstyle = (function() {
             dragdrop.y = mouseY;
           }
         }
-        var mpos = getLocalPos(windowList[mouseOverWin], mouseX, mouseY);
+        var mpos = getLocalPos(windowList[mouseOverWid], mouseX, mouseY);
         if ((mpos.y >= 0) && (mpos.x >= 0)
-        && (mpos.x < windowList[mouseOverWin].private.w)
-        && (mpos.y < windowList[mouseOverWin].private.h)
+        && (mpos.x < windowList[mouseOverWid].private.w)
+        && (mpos.y < windowList[mouseOverWid].private.h)
         ) { // only pass content events to handler
-          windowMouseCapture = mouseOverWin;
-          triggerEvent(windowList[mouseOverWin], {type: 'mouseDown', target: dragdrop.source});
+          mouseCaptureWid = mouseOverWid;
+          triggerEvent(windowList[mouseOverWid], {type: 'mouseDown', target: dragdrop.source});
         } else {
-          triggerEvent(windowList[mouseOverWin], {type: 'dragFrame', target: dragdrop.source});
+          triggerEvent(windowList[mouseOverWid], {type: 'dragFrame', target: dragdrop.source});
         }
       } else {
       }
@@ -1756,11 +1756,11 @@ var appstyle = (function() {
   }
   
   function ev_dblclick(ev) {
-    if (mouseOverWin >= 0) {
-      var r = triggerEvent(windowList[mouseOverWin], {type: 'dblClick', target: windowList[mouseOverWin].private.mouseTarget});
+    if (mouseOverWid >= 0) {
+      var r = triggerEvent(windowList[mouseOverWid], {type: 'dblClick', target: windowList[mouseOverWid].private.mouseTarget});
       if (r) {
-        if (windowList[mouseOverWin].private.mouseTarget.class == 'titleBar') {
-          var win = windowList[mouseOverWin];
+        if (windowList[mouseOverWid].private.mouseTarget.class == 'titleBar') {
+          var win = windowList[mouseOverWid];
           if (win.titleBar && (!win.private.collapsed)) {
             win.private.collapsed = true;
             if (win.titleBar) {
@@ -1800,11 +1800,11 @@ var appstyle = (function() {
       $('#myTextOverlay').css({top: '-1000px'});
       focusWidget = getWidgetReference(false, -1);
     }
-    if (mouseOverWin == wid) {
-      mouseOverWin = -1;
+    if (mouseOverWid == wid) {
+      mouseOverWid = -1;
     }
-    if (focusWindow == wid) {
-      focusWindow = -1;
+    if (focusWid == wid) {
+      focusWid = -1;
     }
   }
 
@@ -1834,40 +1834,40 @@ var appstyle = (function() {
 
         var contentArea = false;
 
-        if (mouseOverWin >= 0) {
-          var mpos = getLocalPos(windowList[mouseOverWin], mouseX, mouseY);
+        if (mouseOverWid >= 0) {
+          var mpos = getLocalPos(windowList[mouseOverWid], mouseX, mouseY);
           contentArea = ((mpos.y >= 0) && (mpos.x >= 0)
-          && (mpos.x < windowList[mouseOverWin].private.w)
-          && (mpos.y < windowList[mouseOverWin].private.h)
+          && (mpos.x < windowList[mouseOverWid].private.w)
+          && (mpos.y < windowList[mouseOverWid].private.h)
           );
         }
 
-        if (windowMouseCapture >= 0) {
-          triggerEvent(windowList[windowMouseCapture], {type: 'mouseUp', target: windowList[windowMouseCapture].private.mouseTarget, captured: true});
+        if (mouseCaptureWid >= 0) {
+          triggerEvent(windowList[mouseCaptureWid], {type: 'mouseUp', target: windowList[mouseCaptureWid].private.mouseTarget, captured: true});
         }
 
-        if (mouseOverWin >= 0) {
+        if (mouseOverWid >= 0) {
           if ((dragdrop.source.id) && (dragdrop.source.id != '')
-          && (dragdrop.source.id == windowList[mouseOverWin].private.mouseTarget.id)
-          && (dragdrop.wid == mouseOverWin)) {
-            triggerEvent(windowList[dragdrop.wid], {type: 'click', target: windowList[mouseOverWin].private.mouseTarget});
+          && (dragdrop.source.id == windowList[mouseOverWid].private.mouseTarget.id)
+          && (dragdrop.wid == mouseOverWid)) {
+            triggerEvent(windowList[dragdrop.wid], {type: 'click', target: windowList[mouseOverWid].private.mouseTarget});
           }
         }
 
-        if (mouseOverWin >= 0) {
+        if (mouseOverWid >= 0) {
           if (!contentArea) {
-            if (dragdrop.wid == mouseOverWin) {
-              triggerEvent(windowList[mouseOverWin], {type: 'dropFrame', target: windowList[mouseOverWin].private.mouseTarget});
+            if (dragdrop.wid == mouseOverWid) {
+              triggerEvent(windowList[mouseOverWid], {type: 'dropFrame', target: windowList[mouseOverWid].private.mouseTarget});
             } else {
-              triggerEvent(windowList[mouseOverWin], {type: 'dropOnFrame',
+              triggerEvent(windowList[mouseOverWid], {type: 'dropOnFrame',
                 source: dragdrop.source,
-                target: windowList[mouseOverWin].private.mouseTarget
+                target: windowList[mouseOverWid].private.mouseTarget
               });
             }
           } else {
-            triggerEvent(windowList[mouseOverWin], {type: 'drop',
+            triggerEvent(windowList[mouseOverWid], {type: 'drop',
               source: dragdrop.source,
-              target: windowList[mouseOverWin].private.mouseTarget
+              target: windowList[mouseOverWid].private.mouseTarget
             });
           }
         }
@@ -1882,7 +1882,7 @@ var appstyle = (function() {
         if (windowList[dragdrop.wid] && windowList[dragdrop.wid].private) {
           windowList[dragdrop.wid].private.dragdrop = false;
         }
-        windowMouseCapture = -1;
+        mouseCaptureWid = -1;
         dragdrop.wid = -1;
         $('body').removeClass('dragging');
       }
@@ -1983,9 +1983,9 @@ var appstyle = (function() {
   }
   
   function ev_keydown(e) {
-    if ((focusWindow != -1)
-    && windowList[focusWindow]) {
-      triggerEvent(windowList[focusWindow], {
+    if ((focusWid != -1)
+    && windowList[focusWid]) {
+      triggerEvent(windowList[focusWid], {
         type: 'keyDown', which: e.which, code: e.code,
         charCode: e.charCode, keyCode: e.keyCode,
         shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey
@@ -1996,9 +1996,9 @@ var appstyle = (function() {
     if (focusWidget.wid != -1) {
       ev_textchange();
     }
-    if ((focusWindow != -1)
-    && windowList[focusWindow]) {
-      triggerEvent(windowList[focusWindow], {
+    if ((focusWid != -1)
+    && windowList[focusWid]) {
+      triggerEvent(windowList[focusWid], {
         type: 'keyUp', which: e.which, code: e.code,
         charCode: e.charCode, keyCode: e.keyCode,
         shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey
@@ -2008,9 +2008,9 @@ var appstyle = (function() {
   function ev_keypress(e) {
     var ch = String.fromCharCode(e.which);
 
-    if ((focusWindow != -1)
-    && windowList[focusWindow]) {
-      triggerEvent(windowList[focusWindow], {
+    if ((focusWid != -1)
+    && windowList[focusWid]) {
+      triggerEvent(windowList[focusWid], {
         type: 'keyPress', char: String.fromCharCode(e.which),
         which: e.which, code: e.code,
         charCode: e.charCode, keyCode: e.keyCode,
@@ -2029,7 +2029,7 @@ var appstyle = (function() {
   function ev_textblur() {
     if ((focusWidget.class != '') && (!focusWidgetLoading)) {
       if ((focusWidget.wid != -1) && (focusWidget.class == 'textInput')) {
-        windowList[focusWidget.wid].storage[focusWidgetStorage] = $('#myTextOverlay input')[0].value;
+        windowList[focusWidget.wid].storage[focusWidgetStorage].value = $('#myTextOverlay input')[0].value;
       }
       if (focusWidget.wid != -1) {
         $('#myTextOverlay').css({top: '-1000px'});
@@ -2043,7 +2043,7 @@ var appstyle = (function() {
     if ((focusWidget.wid != -1) && (focusWidget.class == 'textInput')) {
       if (windowList[focusWidget.wid]
       && (typeof windowList[focusWidget.wid].storage != "undefined")) {
-        windowList[focusWidget.wid].storage[focusWidgetStorage] = $('#myTextOverlay input')[0].value;
+        windowList[focusWidget.wid].storage[focusWidgetStorage].value = $('#myTextOverlay input')[0].value;
       }
     }
   }
@@ -2176,10 +2176,13 @@ var appstyle = (function() {
   }
   
   var textInput = function(win, storage, defaultValue, props) {
-    if (typeof defaultValue != "undefined") {
-      if (typeof win.storage[storage] == "undefined") {
-        win.storage[storage] = defaultValue;
-      }
+    var dv = defaultValue;
+    if (typeof dv == "undefined") {
+      dv = '';
+    }
+    if ((typeof win.storage[storage] == "undefined")
+    || (typeof win.storage[storage].value == "undefined")) {
+      win.storage[storage] = {value: dv};
     }
     var o = {
       class: "textInput",
@@ -2272,9 +2275,9 @@ var appstyle = (function() {
     var mh = ((h-2) * pixZoomFactor);
     if (win.private.active && ids && (win.private.focusWidget.id == ids) && (!win.private.collapsed)) {
       drawTime = false;
-      if ((focusWidget.wid != win.private.id) || (focusWidget.id != ids)) {
+      if ((focusWidget.wid != win.private.wid) || (focusWidget.id != ids)) {
         // initialize the new input
-        $('#myText').val(win.storage[storage]);
+        $('#myText').val(win.storage[storage].value);
         drawTime = true;
         focusWidgetLoading = true;
         focusWidget = win.private.focusWidget;
@@ -2282,8 +2285,8 @@ var appstyle = (function() {
       }
       if (drawTime) {
         $('#myTextOverlay').css({
-          left: Math.floor(((2 + windowList[win.private.id].private.cx + x))*pixZoomFactor/dpr) + 'px',
-          top: (Math.floor(((2 + windowList[win.private.id].private.cy + win.private.titleBarHeight -
+          left: Math.floor(((2 + windowList[win.private.wid].private.cx + x))*pixZoomFactor/dpr) + 'px',
+          top: (Math.floor(((2 + windowList[win.private.wid].private.cy + win.private.titleBarHeight -
           4/pixZoomFactor + y))*pixZoomFactor/dpr) + 2-(dpr*pixZoomFactor/2)) + 'px',
           display: 'block'
         });
@@ -2322,12 +2325,12 @@ var appstyle = (function() {
         }
       } else {
         var mto = document.getElementById('myTextOverlay');
-        if ( (mto.offsetLeft != (windowList[win.private.id].private.cx + x))
-        || (mto.offsetTop != (windowList[win.private.id].private.cy + win.private.titleBarHeight + y))
+        if ( (mto.offsetLeft != (windowList[win.private.wid].private.cx + x))
+        || (mto.offsetTop != (windowList[win.private.wid].private.cy + win.private.titleBarHeight + y))
         ) {
           $('#myTextOverlay').css({
-            left: Math.floor((2 + windowList[win.private.id].private.cx + x)*pixZoomFactor/dpr) + 'px',
-            top: (Math.floor((2 + windowList[win.private.id].private.cy + win.private.titleBarHeight
+            left: Math.floor((2 + windowList[win.private.wid].private.cx + x)*pixZoomFactor/dpr) + 'px',
+            top: (Math.floor((2 + windowList[win.private.wid].private.cy + win.private.titleBarHeight
             - 4/pixZoomFactor + y)*pixZoomFactor/dpr) + 2 -
             dpr*pixZoomFactor/2) + 'px'
           });
@@ -2340,7 +2343,7 @@ var appstyle = (function() {
             height: (((mh-8)/dpr)+(2/(dpr*pixZoomFactor))*2) + 'px',
             fontSize: (((mh-12)/dpr)+(3/(dpr*pixZoomFactor))*3) + 'px'
           });
-          if ((focusWidget.wid == win.private.id) && (win.private.focusWidget.id == ids)) {
+          if ((focusWidget.wid == win.private.wid) && (win.private.focusWidget.id == ids)) {
             ctx.beginPath();
             ctx.fillStyle = theme.colorActiveTextInputBack;
             ctx.rect(x, y, w, h);
@@ -2351,25 +2354,25 @@ var appstyle = (function() {
       // if mousedown, what happens here?
       if (win.private.focusWidgetWait) {
         win.private.focusWidgetWait = false;
-        lastFocusWin = win.private.id;
+        lastFocusWid = win.private.wid;
         lastFocusId = ids;
         setTimeout(function() {
           $('#myText').focus();
           $('#myText').select();
         }, 1);
-        if (windowMouseCapture != -1) {
-          triggerEvent(windowList[windowMouseCapture], {type:'mouseUp',
-            target: windowList[windowMouseCapture].private.mouseTarget}
+        if (mouseCaptureWid != -1) {
+          triggerEvent(windowList[mouseCaptureWid], {type:'mouseUp',
+            target: windowList[mouseCaptureWid].private.mouseTarget}
           );
           if (win.private.focusWidget.id != '') {
             triggerEvent(win, {type:'click',
             target: win.private.focusWidget});
           }
-          windowMouseCapture = -1;
+          mouseCaptureWid = -1;
         }
       }
     } else { // everything above this was current active input
-      if ((focusWidget.wid == win.private.id) && (focusWidget.id == ids)) {
+      if ((focusWidget.wid == win.private.wid) && (focusWidget.id == ids)) {
         $('#myTextOverlay').css({
           top: -1000 + 'px'
         });
@@ -2383,7 +2386,7 @@ var appstyle = (function() {
       ctx.font = ((mh*0.8)/pixZoomFactor) + 'px ' + windowFontName;
       ctx.fillStyle = theme.colorInactiveTextInputFore;
       ctx.beginPath();
-      ctx.fillText(win.storage[storage],
+      ctx.fillText(win.storage[storage].value,
         x + 4*dpr/pixZoomFactor,
         y + ((mh * 0.2)/pixZoomFactor),
         w - 4*dpr/pixZoomFactor
@@ -2742,21 +2745,21 @@ var appstyle = (function() {
     (mouseY+win.private.titleBarHeight+win.private.cy+1), {
       x:0, y:3.75, w: 20
     });
-    if (mouseOverWin >= 0) {
-      var vid = windowList[mouseOverWin].private.mouseTarget.id;
+    if (mouseOverWid >= 0) {
+      var vid = windowList[mouseOverWid].private.mouseTarget.id;
       if (typeof vid == "undefined") {
         vid = 'âˆ…';
       }
-      textLn(win, 'Targ: [' + mouseOverWin + '] '
-        + windowList[mouseOverWin].private.mouseTarget.class + ' (#'
-        + windowList[mouseOverWin].private.mouseTarget.currentIndex + ': ' + vid + ')', {
+      textLn(win, 'Targ: [' + mouseOverWid + '] '
+        + windowList[mouseOverWid].private.mouseTarget.class + ' (#'
+        + windowList[mouseOverWid].private.mouseTarget.currentIndex + ': ' + vid + ')', {
         w: 20
       });
       var data = 'âˆ…';
-      if (mouseOverWin >= 0) {
-        var widglist = windowList[mouseOverWin].private.widgets;
-        if (windowList[mouseOverWin].private.mouseTarget.currentIndex >= 0) {
-          var widg = widglist[windowList[mouseOverWin].private.mouseTarget.currentIndex];
+      if (mouseOverWid >= 0) {
+        var widglist = windowList[mouseOverWid].private.widgets;
+        if (windowList[mouseOverWid].private.mouseTarget.currentIndex >= 0) {
+          var widg = widglist[windowList[mouseOverWid].private.mouseTarget.currentIndex];
           if (typeof widg != "undefined") {
             // interrogate for data
 
@@ -2977,7 +2980,7 @@ var appstyle = (function() {
   
   function getMousePos(win) {
     var mp = {};
-    if (typeof win != "undefined") {
+    if ((typeof win != "undefined") && (win >= 0)) {
       mp = getLocalPos(win, mouseX, mouseY);
     } else {
       mp = {x: mouseX, y: mouseY};
@@ -2985,9 +2988,9 @@ var appstyle = (function() {
     return mp;
   }
 
-$(document).ready(function() {
-  init();
-});
+  $(document).ready(function() {
+    init();
+  });
   
   return {
     // basic usage
@@ -3002,7 +3005,9 @@ $(document).ready(function() {
     drawBackground: drawBackground,
     drawWidgets: drawWidgets,
     drawText: drawText,
-
+    drawFlatOutline: drawFlatOutline,
+    drawBevel: drawBevel,
+  
     // helper functions
     getMousePos: getMousePos,
     getLocalPos: getLocalPos,
