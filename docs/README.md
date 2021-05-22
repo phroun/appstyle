@@ -6,7 +6,7 @@
 
 ### Core Subjects
 
- * [Window Management](windows.md)
+ * [Window Management & Window Events](windows.md)
  * [Callbacks](callbacks.md)
  * [Grid System](grid-system.md)
  * [Keyboard Events](keyboard-events.md)
