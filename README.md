@@ -48,7 +48,7 @@ In addition to callbacks, you can also specify whatever other default options yo
 
 Although you can use pixels to place and position everything, we provide a "[Character Grid](docs/CharacterGrid.md)" to help make window layout easier, and to make programming more akin to the text-mode development common on computers of the 1980s.
 
-Any time you specify a width or height, or the x or y coordinate of a widget within a window, you can use this system. The coordinates do not need to be whole numbers, so if you want to place something half way between line 1 and 2, just use 1.5.  If you find the need to use pixel sizing and placement for a specific widget, we have an option to do this as well.
+Any time you specify a width or height, or the x or y coordinate of a widget within a window, you can use this system. The coordinates do not need to be whole numbers, so if you want to place something half way between line 1 and 2, just use 1.5.  If you find the need to use pixel sizing and placement for a specific widget, we have a "[Pixel Mode](docs/PixelMode.md)" option to do this as well.
 
 ### Creating Windows
 
