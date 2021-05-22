@@ -11,7 +11,7 @@
  * [Grid System](grid-system.md)
  * [Keyboard Events](keyboard-events.md)
  * [Mouse Events](mouse-events.md)
- * [Focus](focus.md)
+ * [Focus and Focus Events](focus.md)
 
 ### Widget Library
 
