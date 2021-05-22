@@ -93,7 +93,28 @@ Generally speaking, Widgets will be painted in the order they are defined, so if
 
 ## Responding to Events
 
-You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Class in order to respond to events.
+You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Class in order to respond to events.  Here is a small example:
+
+```js
+function myWindowEvent(win, evt) {
+  if (evt.target.id == 'myButton') {
+    alert('button was clicked!');
+  }
+}
+
+function myWindowWidgets(win) {
+  appstyle.button('myButton', 'Click Me!', {x:0, y:0, w:10});
+}
+
+$(document).ready(function() {
+  appstyle.registerWindowClass('myWindow', {
+    title: 'My Window',
+    widgets: myWindowWidgets,
+    event: myWindowEvent
+  });
+  appstyle.makeWindow({class: 'myWindow'});
+});
+```
 
 ### Window Manager Events
   * [close](docs/events/close.md) - fired when the close button in the upper corner of the window is activated
