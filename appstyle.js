@@ -1,5 +1,5 @@
 /*!
- * appstyle JavaScript Library v1.0.0
+ * appstyle JavaScript Library v1.0.1
  * https://github.com/phroun/appstyle
  *
  * Copyright Jeffrey R. Day and other contributors
@@ -15,7 +15,8 @@ var appstyle = (function() {
   var windowFontName = '"Helvetica"';
   var options = {
     customPixZoomFactor: 0,
-    uiScaleFactor: 0.25
+    uiScaleFactor: 0.25,
+    useSystemCursor: true
   }
 
   // ==== Color Theme ====
@@ -224,31 +225,34 @@ var appstyle = (function() {
   });
   
   var triggerEvent = function(win, evt) {
-    var evid = win.private.wid + ':' + evt.type;
-    var r = true;
-    if (typeof eventDispatcher[evid] == "undefined") {
-      eventDispatcher[evid] = true;
+    var evid = '';
+    if (win && win.private) {
+      evid = win.private.wid + ':' + evt.type;
+      var r = true;
+      if (typeof eventDispatcher[evid] == "undefined") {
+        eventDispatcher[evid] = true;
 
-      mouseX -= win.private.cx + 1;
-      var tbh = 0;
-      if (win.private) {
-        tbh = win.private.titleBarHeight || 0;
-      }
-      mouseY -= win.private.cy + Math.floor(tbh) + 1;
-      var restoreX = win.private.cx + 1
-      var restoreY = win.private.cy + Math.floor(tbh) + 1;
-      if (win.event) {
-        r = win.event(win, evt);
-        if (typeof r == 'undefined') {
+        mouseX -= win.private.cx + 1;
+        var tbh = 0;
+        if (win.private) {
+          tbh = win.private.titleBarHeight || 0;
+        }
+        mouseY -= win.private.cy + Math.floor(tbh) + 1;
+        var restoreX = win.private.cx + 1
+        var restoreY = win.private.cy + Math.floor(tbh) + 1;
+        if (win.event) {
+          r = win.event(win, evt);
+          if (typeof r == 'undefined') {
+            r = true;
+          }
+        } else {
           r = true;
         }
-      } else {
-        r = true;
+        mouseX += restoreX;
+        mouseY += restoreY;
+        
+        delete eventDispatcher[evid];
       }
-      mouseX += restoreX;
-      mouseY += restoreY;
-      
-      delete eventDispatcher[evid];
     }
     return r;
   }
@@ -1372,7 +1376,8 @@ var appstyle = (function() {
       || (win.private.mouseElement.class == 'hSizer')
       || (win.private.mouseElement.class == 'vSizer')
       || (win.private.mouseElement.class == 'xSizer')
-      || (win.private.mouseElement.class == 'closeBtn')) {
+      || (win.private.mouseElement.class == 'closeBtn')
+      || (win.private.mouseElement.class == 'textInput')) {
         if ((dragdrop.wid == -1) || (dragdrop.wid == mouseOverWid)) {
           cursorType = 0;
           if (win.private.mouseElement.class == 'hSizer') {
@@ -1384,6 +1389,9 @@ var appstyle = (function() {
           if (win.private.mouseElement.class == 'xSizer') {
             cursorType = 4;
           }
+          if (win.private.mouseElement.class == 'textInput') {
+            cursorType = 5;
+          }
         }
       } else {
         if (typeof win.cursor != "undefined") {
@@ -1391,202 +1399,231 @@ var appstyle = (function() {
         }
       }
     }
-
-    if (inputHideMouse || boundsHideMouse) {
-      cursorType = -1;
-    }
-
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.2;
-    var size = options.uiScaleFactor;
-    var lofs = 0;
-    var xofs = 0;
-    var yofs = 0;
     
-    
-    // Arrow
-    if (cursorType == 0) {
-      xofs = 0.5;
-    }
-
-    // Crosshair
-    if (cursorType > 0) {
-      size = size * 1.2;
-      xofs = -24*size;
-      yofs = -24*size;
-    }
-    if (cursorType >= 2) {
-      size = size * 1.3;
-    }
-
-    if ((mouseX >= 0) && (mouseY >= 0)) {
-      var my_gradient = ctx.createLinearGradient(Math.floor(mouseX+xofs), Math.floor(mouseY+yofs),
-        Math.floor(mouseX+xofs+size*30), Math.floor(mouseY+yofs+size*50));
-      my_gradient.addColorStop(0, "#ff0000");
-      my_gradient.addColorStop(0.6, "#0000ff");
-      my_gradient.addColorStop(1, "#009900");
-      ctx.fillStyle = my_gradient;
+    if (options.useSystemCursor) {
+      // convert cursorType into a system cursor
+      var sysCursor = 'default';
+      if (cursorType == -1) {
+        sysCursor = 'none';
+      }
+      if (cursorType == 1) {
+        sysCursor = 'crosshair';
+      }
+      if (cursorType == 2) {
+        sysCursor = 'col-resize';
+      }
+      if (cursorType == 3) {
+        sysCursor = 'row-resize';
+      }
+      if (cursorType == 4) {
+        sysCursor = 'nwse-resize';
+      }
+      if (cursorType == 5) {
+        sysCursor = 'text';
+      }
+      c.style.cursor = sysCursor;
     } else {
-      ctx.fillStyle = '#000000';
-    }
+    
+      if (cursorType == 5) {
+        cursorType = 0;
+      }
 
-    if (cursorType == 0) {
-      lofs = -0.2
-      ctx.beginPath();
-      ctx.moveTo(mouseX+xofs+lofs,    mouseY);
-      ctx.lineTo(mouseX+xofs+lofs,    mouseY+51*size); // left edge
-      ctx.lineTo(mouseX+xofs+10*size+lofs, mouseY+36*size); // left barb
-      ctx.lineTo(mouseX+xofs+21*size+lofs, mouseY+60*size); // left tail
-      ctx.lineTo(mouseX+xofs+31*size, mouseY+56*size); // bottom tail
-      ctx.lineTo(mouseX+xofs+20*size, mouseY+32*size); // right tail
-      ctx.lineTo(mouseX+xofs+36*size, mouseY+32*size); // right barb
-      ctx.lineTo(mouseX+xofs, mouseY); // right edge
-      ctx.fill();
-      ctx.stroke();
-    }
-    
-    if (cursorType == 2) {
-      ctx.beginPath();
-      ctx.moveTo(mouseX-24*size,mouseY+00*size);
-      ctx.lineTo(mouseX-12*size,mouseY-10*size);
-      ctx.lineTo(mouseX-12*size,mouseY-03*size);
-      ctx.lineTo(mouseX-03*size,mouseY-03*size);
-      ctx.lineTo(mouseX-03*size,mouseY-20*size);
-      ctx.lineTo(mouseX+03*size,mouseY-20*size);
-      ctx.lineTo(mouseX+03*size,mouseY-03*size);
-      ctx.lineTo(mouseX+12*size,mouseY-03*size);
-      ctx.lineTo(mouseX+12*size,mouseY-10*size);
-      ctx.lineTo(mouseX+24*size,mouseY-00*size);
-      ctx.lineTo(mouseX+12*size,mouseY+10*size);
-      ctx.lineTo(mouseX+12*size,mouseY+03*size);
-      ctx.lineTo(mouseX+03*size,mouseY+03*size);
-      ctx.lineTo(mouseX+03*size,mouseY+20*size);
-      ctx.lineTo(mouseX-03*size,mouseY+20*size);
-      ctx.lineTo(mouseX-03*size,mouseY+03*size);
-      ctx.lineTo(mouseX-12*size,mouseY+03*size);
-      ctx.lineTo(mouseX-12*size,mouseY+10*size);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
-    if (cursorType == 3) {
-      ctx.beginPath();
-      ctx.moveTo(mouseX+00*size,mouseY-24*size);
-      ctx.lineTo(mouseX-10*size,mouseY-12*size);
-      ctx.lineTo(mouseX-03*size,mouseY-12*size);
-      ctx.lineTo(mouseX-03*size,mouseY-03*size);
-      ctx.lineTo(mouseX-20*size,mouseY-03*size);
-      ctx.lineTo(mouseX-20*size,mouseY+03*size);
-      ctx.lineTo(mouseX-03*size,mouseY+03*size);
-      ctx.lineTo(mouseX-03*size,mouseY+12*size);
-      ctx.lineTo(mouseX-10*size,mouseY+12*size);
-      ctx.lineTo(mouseX-00*size,mouseY+24*size);
-      ctx.lineTo(mouseX+10*size,mouseY+12*size);
-      ctx.lineTo(mouseX+03*size,mouseY+12*size);
-      ctx.lineTo(mouseX+03*size,mouseY+03*size);
-      ctx.lineTo(mouseX+20*size,mouseY+03*size);
-      ctx.lineTo(mouseX+20*size,mouseY-03*size);
-      ctx.lineTo(mouseX+03*size,mouseY-03*size);
-      ctx.lineTo(mouseX+03*size,mouseY-12*size);
-      ctx.lineTo(mouseX+10*size,mouseY-12*size);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
-    
-    if (cursorType == 4) { // diagonal resize
-      ctx.beginPath();
-      ctx.moveTo(mouseX-18*size,mouseY-18*size);
-      ctx.lineTo(mouseX -0*size,mouseY-18*size);
-      ctx.lineTo(mouseX -7*size,mouseY-12*size);
-      ctx.lineTo(mouseX+12*size,mouseY +7*size);
-      ctx.lineTo(mouseX+18*size,mouseY +0*size);
-      ctx.lineTo(mouseX+18*size,mouseY+18*size);
-      ctx.lineTo(mouseX +0*size,mouseY+18*size);
-      ctx.lineTo(mouseX +7*size,mouseY+12*size);
-      ctx.lineTo(mouseX-12*size,mouseY -7*size);
-      ctx.lineTo(mouseX-18*size,mouseY -0*size);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
-    
-   // Crosshair Cursor    
-    if (cursorType == 1) {
-      var p, g;
-      if ((mouseX >= 0) & (mouseY >= 0)) {
-        try {
-          p = ctx.getImageData(mouseX, mouseY, 1, 1).data;
-        } catch(err) {
-        }
-        if (typeof p == "undefined") {
+      if (inputHideMouse || boundsHideMouse) {
+        cursorType = -1;
+      }
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
+      var size = options.uiScaleFactor;
+      var lofs = 0;
+      var xofs = 0;
+      var yofs = 0;
+      
+      
+      // Arrow
+      if (cursorType == 0) {
+        xofs = 0.5;
+      }
+
+      // Crosshair
+      if (cursorType > 0) {
+        size = size * 1.2;
+        xofs = -24*size;
+        yofs = -24*size;
+      }
+      if (cursorType >= 2) {
+        size = size * 1.3;
+      }
+
+      if ((mouseX >= 0) && (mouseY >= 0)) {
+        var my_gradient = ctx.createLinearGradient(Math.floor(mouseX+xofs), Math.floor(mouseY+yofs),
+          Math.floor(mouseX+xofs+size*30), Math.floor(mouseY+yofs+size*50));
+        my_gradient.addColorStop(0, "#ff0000");
+        my_gradient.addColorStop(0.6, "#0000ff");
+        my_gradient.addColorStop(1, "#009900");
+        ctx.fillStyle = my_gradient;
+      } else {
+        ctx.fillStyle = '#000000';
+      }
+
+      if (cursorType == 0) {
+        lofs = -0.2
+        ctx.beginPath();
+        ctx.moveTo(mouseX+xofs+lofs,    mouseY);
+        ctx.lineTo(mouseX+xofs+lofs,    mouseY+51*size); // left edge
+        ctx.lineTo(mouseX+xofs+10*size+lofs, mouseY+36*size); // left barb
+        ctx.lineTo(mouseX+xofs+21*size+lofs, mouseY+60*size); // left tail
+        ctx.lineTo(mouseX+xofs+31*size, mouseY+56*size); // bottom tail
+        ctx.lineTo(mouseX+xofs+20*size, mouseY+32*size); // right tail
+        ctx.lineTo(mouseX+xofs+36*size, mouseY+32*size); // right barb
+        ctx.lineTo(mouseX+xofs, mouseY); // right edge
+        ctx.fill();
+        ctx.stroke();
+      }
+      
+      if (cursorType == 2) {
+        ctx.beginPath();
+        ctx.moveTo(mouseX-24*size,mouseY+00*size);
+        ctx.lineTo(mouseX-12*size,mouseY-10*size);
+        ctx.lineTo(mouseX-12*size,mouseY-03*size);
+        ctx.lineTo(mouseX-03*size,mouseY-03*size);
+        ctx.lineTo(mouseX-03*size,mouseY-20*size);
+        ctx.lineTo(mouseX+03*size,mouseY-20*size);
+        ctx.lineTo(mouseX+03*size,mouseY-03*size);
+        ctx.lineTo(mouseX+12*size,mouseY-03*size);
+        ctx.lineTo(mouseX+12*size,mouseY-10*size);
+        ctx.lineTo(mouseX+24*size,mouseY-00*size);
+        ctx.lineTo(mouseX+12*size,mouseY+10*size);
+        ctx.lineTo(mouseX+12*size,mouseY+03*size);
+        ctx.lineTo(mouseX+03*size,mouseY+03*size);
+        ctx.lineTo(mouseX+03*size,mouseY+20*size);
+        ctx.lineTo(mouseX-03*size,mouseY+20*size);
+        ctx.lineTo(mouseX-03*size,mouseY+03*size);
+        ctx.lineTo(mouseX-12*size,mouseY+03*size);
+        ctx.lineTo(mouseX-12*size,mouseY+10*size);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      if (cursorType == 3) {
+        ctx.beginPath();
+        ctx.moveTo(mouseX+00*size,mouseY-24*size);
+        ctx.lineTo(mouseX-10*size,mouseY-12*size);
+        ctx.lineTo(mouseX-03*size,mouseY-12*size);
+        ctx.lineTo(mouseX-03*size,mouseY-03*size);
+        ctx.lineTo(mouseX-20*size,mouseY-03*size);
+        ctx.lineTo(mouseX-20*size,mouseY+03*size);
+        ctx.lineTo(mouseX-03*size,mouseY+03*size);
+        ctx.lineTo(mouseX-03*size,mouseY+12*size);
+        ctx.lineTo(mouseX-10*size,mouseY+12*size);
+        ctx.lineTo(mouseX-00*size,mouseY+24*size);
+        ctx.lineTo(mouseX+10*size,mouseY+12*size);
+        ctx.lineTo(mouseX+03*size,mouseY+12*size);
+        ctx.lineTo(mouseX+03*size,mouseY+03*size);
+        ctx.lineTo(mouseX+20*size,mouseY+03*size);
+        ctx.lineTo(mouseX+20*size,mouseY-03*size);
+        ctx.lineTo(mouseX+03*size,mouseY-03*size);
+        ctx.lineTo(mouseX+03*size,mouseY-12*size);
+        ctx.lineTo(mouseX+10*size,mouseY-12*size);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      
+      if (cursorType == 4) { // diagonal resize
+        ctx.beginPath();
+        ctx.moveTo(mouseX-18*size,mouseY-18*size);
+        ctx.lineTo(mouseX -0*size,mouseY-18*size);
+        ctx.lineTo(mouseX -7*size,mouseY-12*size);
+        ctx.lineTo(mouseX+12*size,mouseY +7*size);
+        ctx.lineTo(mouseX+18*size,mouseY +0*size);
+        ctx.lineTo(mouseX+18*size,mouseY+18*size);
+        ctx.lineTo(mouseX +0*size,mouseY+18*size);
+        ctx.lineTo(mouseX +7*size,mouseY+12*size);
+        ctx.lineTo(mouseX-12*size,mouseY -7*size);
+        ctx.lineTo(mouseX-18*size,mouseY -0*size);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      
+     // Crosshair Cursor    
+      if (cursorType == 1) {
+        var p, g;
+        if ((mouseX >= 0) & (mouseY >= 0)) {
+          try {
+            p = ctx.getImageData(mouseX, mouseY, 1, 1).data;
+          } catch(err) {
+          }
+          if (typeof p == "undefined") {
+            p = [0,0,0];
+          }
+          p = [p[0],p[1],p[2]];
+        } else {
           p = [0,0,0];
         }
-        p = [p[0],p[1],p[2]];
-      } else {
-        p = [0,0,0];
+        g = [0,0,0];
+        g = contrasting(p);
+
+        var hex = "#" + ("000000" + rgbToHex(g[0], g[1], g[2])).slice(-6);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = hex;
+        ctx.beginPath();
+        ctx.moveTo(mouseX, mouseY - 8*size);
+        ctx.lineTo(mouseX, mouseY - 1);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(mouseX, mouseY + 1);
+        ctx.lineTo(mouseX, mouseY + 8*size);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(mouseX - 8*size,  mouseY);
+        ctx.lineTo(mouseX - 1, mouseY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(mouseX + 1,  mouseY);
+        ctx.lineTo(mouseX + 8*size, mouseY);
+        ctx.stroke();
+        ctx.strokeStyle = '#ffffff';
+
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); // top
+        ctx.moveTo(mouseX -4*size, mouseY -24*size);
+        ctx.lineTo(mouseX +4*size, mouseY -24*size);
+        ctx.lineTo(mouseX +4*size, mouseY -14*size);
+        ctx.lineTo(mouseX,         mouseY  -8*size);
+        ctx.lineTo(mouseX -4*size, mouseY -14*size);
+        ctx.lineTo(mouseX -4*size, mouseY -24*size);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath(); // left
+        ctx.moveTo(mouseX -24*size,  mouseY - 4*size);
+        ctx.lineTo(mouseX -24*size,  mouseY + 4*size); // left edge
+        ctx.lineTo(mouseX -14*size,  mouseY + 4*size); // bottom edge
+        ctx.lineTo(mouseX -8*size,   mouseY); // bottom diagonal
+        ctx.lineTo(mouseX -14*size,  mouseY -4*size); // top diagonal 
+        ctx.lineTo(mouseX -24*size,  mouseY -4*size); // top edge
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath(); // bottom
+        ctx.moveTo(mouseX,          mouseY + 8*size);
+        ctx.lineTo(mouseX + 4*size, mouseY + 14*size); // right diagonal
+        ctx.lineTo(mouseX + 4*size, mouseY + 24*size); // right edge
+        ctx.lineTo(mouseX -4*size,  mouseY + 24*size); // bottom edge
+        ctx.lineTo(mouseX -4*size,  mouseY + 14*size); // left edge
+        ctx.lineTo(mouseX,          mouseY + 8*size); // left diagonal
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath(); // right
+        ctx.moveTo(mouseX + 8*size,   mouseY); // tip
+        ctx.lineTo(mouseX + 14*size,  mouseY -4*size); // top diagonal
+        ctx.lineTo(mouseX + 24*size,  mouseY -4*size); // top edge
+        ctx.lineTo(mouseX + 24*size,  mouseY +4*size); // right edge
+        ctx.lineTo(mouseX + 14*size,  mouseY +4*size); // bottom edge
+        ctx.lineTo(mouseX + 8*size,   mouseY);
+        ctx.fill();
+        ctx.stroke();
       }
-      g = [0,0,0];
-      g = contrasting(p);
-
-      var hex = "#" + ("000000" + rgbToHex(g[0], g[1], g[2])).slice(-6);
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = hex;
-      ctx.beginPath();
-      ctx.moveTo(mouseX, mouseY - 8*size);
-      ctx.lineTo(mouseX, mouseY - 1);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(mouseX, mouseY + 1);
-      ctx.lineTo(mouseX, mouseY + 8*size);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(mouseX - 8*size,  mouseY);
-      ctx.lineTo(mouseX - 1, mouseY);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(mouseX + 1,  mouseY);
-      ctx.lineTo(mouseX + 8*size, mouseY);
-      ctx.stroke();
-      ctx.strokeStyle = '#ffffff';
-
-      ctx.lineWidth = 1.2;
-      ctx.beginPath(); // top
-      ctx.moveTo(mouseX -4*size, mouseY -24*size);
-      ctx.lineTo(mouseX +4*size, mouseY -24*size);
-      ctx.lineTo(mouseX +4*size, mouseY -14*size);
-      ctx.lineTo(mouseX,         mouseY  -8*size);
-      ctx.lineTo(mouseX -4*size, mouseY -14*size);
-      ctx.lineTo(mouseX -4*size, mouseY -24*size);
-      ctx.fill();
-      ctx.stroke();
-      ctx.beginPath(); // left
-      ctx.moveTo(mouseX -24*size,  mouseY - 4*size);
-      ctx.lineTo(mouseX -24*size,  mouseY + 4*size); // left edge
-      ctx.lineTo(mouseX -14*size,  mouseY + 4*size); // bottom edge
-      ctx.lineTo(mouseX -8*size,   mouseY); // bottom diagonal
-      ctx.lineTo(mouseX -14*size,  mouseY -4*size); // top diagonal 
-      ctx.lineTo(mouseX -24*size,  mouseY -4*size); // top edge
-      ctx.fill();
-      ctx.stroke();
-      ctx.beginPath(); // bottom
-      ctx.moveTo(mouseX,          mouseY + 8*size);
-      ctx.lineTo(mouseX + 4*size, mouseY + 14*size); // right diagonal
-      ctx.lineTo(mouseX + 4*size, mouseY + 24*size); // right edge
-      ctx.lineTo(mouseX -4*size,  mouseY + 24*size); // bottom edge
-      ctx.lineTo(mouseX -4*size,  mouseY + 14*size); // left edge
-      ctx.lineTo(mouseX,          mouseY + 8*size); // left diagonal
-      ctx.fill();
-      ctx.stroke();
-      ctx.beginPath(); // right
-      ctx.moveTo(mouseX + 8*size,   mouseY); // tip
-      ctx.lineTo(mouseX + 14*size,  mouseY -4*size); // top diagonal
-      ctx.lineTo(mouseX + 24*size,  mouseY -4*size); // top edge
-      ctx.lineTo(mouseX + 24*size,  mouseY +4*size); // right edge
-      ctx.lineTo(mouseX + 14*size,  mouseY +4*size); // bottom edge
-      ctx.lineTo(mouseX + 8*size,   mouseY);
-      ctx.fill();
-      ctx.stroke();
     }
 
     if (halfPixel) {
@@ -1641,7 +1678,7 @@ var appstyle = (function() {
 
   var bringToTop = function(wid, force) {
     var forceTop = force || false;
-    var needFocus = (focusWid != wid);
+    var needFocus = ((focusWid != wid) || (!windowList[wid].private.active));
     if (forceTop || needFocus) {
       if ((focusWid != -1)
       && (typeof windowList[focusWid] != "undefined")) {
@@ -2999,9 +3036,9 @@ var appstyle = (function() {
     return mp;
   }
 
-  $(document).ready(function() {
-    init();
-  });
+$(document).ready(function() {
+  init();
+});
   
   return {
     // basic usage
