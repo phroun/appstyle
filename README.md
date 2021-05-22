@@ -117,12 +117,12 @@ $(document).ready(function() {
 ```
 
 ### Window Manager Events
-  * [close](docs/events/close.md) - fired when the close button in the upper corner of the window is activated
+  * [close](docs/windows.md#window-manager-events) - fired when the close button in the upper corner of the window is activated
 
 ### Keyboard Events
-  * [keyDown](docs/events/keyDown.md) - fired when a keyboard key is pressed down
-  * [keyUp](docs/events/keyUp.md) - fired when a keyboard key is released
-  * [keyPress](docs/events/keyPress.md) - fired when a keyboard key is pressed and released, or when the key auto-repeats due to being held down continuously
+  * [keyDown](docs/keyboard-events.md#key-down) - fired when a keyboard key is pressed down
+  * [keyUp](docs/keyboard-events.md#key-up) - fired when a keyboard key is released
+  * [keyPress](docs/keyboard-events.md#key-press) - fired when a keyboard key is pressed and released, or when the key auto-repeats due to being held down continuously
 
 ### Mouse Events
   * [mouseDown](docs/mouse-events.md#mouse-down) - fired when the mouse button is pressed down
@@ -135,12 +135,12 @@ $(document).ready(function() {
   * [dropOnFrame](docs/mouse-events.md#drop-on-frame) - fired when a drag operation ends but the cursor is over the frame rather than the content area of the target window
 
 ### Focus Events
-  * [focus](docs/events/focus.md) - fired when any interactive widget gets keyboard focus
-  * [blur](docs/events/blur.md) - fired when any interactive wiget loses keyboard focus
-  * [focusFirst](docs/events/focusFirst.md) - fired when focus is supposed to go to the first interactive widget
-  * [focusNext](docs/events/focusNext.md) - fired when focus is supposed to go to the next interactive widget in squence
-  * [focusPrior](docs/events/focusPrior.md) - fired when focus is supposed to go to the prior interactive widget in sequence
-  * [focusLast](docs/events/focusLast.md) - fired when focus is supposed to go to the last interactive widget in sequence
+  * [focus](docs/focus.md#focus) - fired when any interactive widget gets keyboard focus
+  * [blur](docs/focus.md#blur) - fired when any interactive wiget loses keyboard focus
+  * [focusFirst](docs/focus.md#focus-first) - fired when focus is supposed to go to the first interactive widget
+  * [focusNext](docs/focus.md#focus-next) - fired when focus is supposed to go to the next interactive widget in squence
+  * [focusPrior](docs/focus.md#focus-prior) - fired when focus is supposed to go to the prior interactive widget in sequence
+  * [focusLast](docs/focus.md#focus-last) - fired when focus is supposed to go to the last interactive widget in sequence
 
 ## Custom Painting
 
