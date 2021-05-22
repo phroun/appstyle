@@ -14,10 +14,10 @@ This paints all of the widgets on the window.
 
 This paints text onto the canvas in the same way the default widgets do.
 
-## [appstyle.drawFlatOutline()](#draw-flat-outline)
+## [appstyle.drawFlatOutline(ctx, ofs, pad, thick, color)](#draw-flat-outline)
 
 This draws a flat colored outline surrounding a rectangular area.
 
-## [appstyle.drawBevel()](#draw-bevel)
+## [appstyle.drawBevel(ctx, ofs, pad, thick, depth, raised, tint)](#draw-bevel)
 
 This draws a beveled outline surrounding a rectangular area.
