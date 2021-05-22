@@ -97,7 +97,7 @@ You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Cl
 
 ```js
 function myWindowEvent(win, evt) {
-  if (evt.target.id == 'myButton') {
+  if ((evt.type == 'click') && (evt.target.id == 'myButton')) {
     alert('button was clicked!');
   }
 }
