@@ -1,5 +1,5 @@
 /*!
- * appstyle JavaScript Library v1.0.2
+ * appstyle JavaScript Library v1.0.2b
  * https://github.com/phroun/appstyle
  *
  * Copyright Jeffrey R. Day and other contributors
@@ -1093,7 +1093,7 @@ var appstyle = (function() {
     if (typeof win.charOffsetY == "undefined") {
       win.private.charOffsetY = 0.1;
     } else {
-      win.pricate.charOffsetY = win.charOffsetY;
+      win.private.charOffsetY = win.charOffsetY;
     }
     if (typeof win.charWidth == "undefined") {
       win.private.charWidth = Math.ceil((24 * options.uiScaleFactor));
