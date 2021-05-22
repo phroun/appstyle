@@ -1938,15 +1938,10 @@ var appstyle = (function() {
         win.private.dragMemoX = win.storage[widget.storage].originX;
         win.private.dragMemoY = win.storage[widget.storage].originY;
       }
-/*      if (widget.pixel) {
-        win.storage[widget.storage].originX = win.private.dragMemoX - (mouseX - dragdrop.x);
-        win.storage[widget.storage].originY = win.private.dragMemoY - (mouseY - dragdrop.y);
-      } else {*/
-        var mpos = getCharFromPos(win, mouseX, mouseY);
-        var dpos = getCharFromPos(win, dragdrop.x, dragdrop.y);
-        win.storage[widget.storage].originX = win.private.dragMemoX - (mpos.x - dpos.x);
-        win.storage[widget.storage].originY = win.private.dragMemoY - (mpos.y - dpos.y);
-//      }
+      var mpos = getCharFromPos(win, mouseX, mouseY);
+      var dpos = getCharFromPos(win, dragdrop.x, dragdrop.y);
+      win.storage[widget.storage].originX = win.private.dragMemoX - (mpos.x - dpos.x);
+      win.storage[widget.storage].originY = win.private.dragMemoY - (mpos.y - dpos.y);
     }
     
     if ((dragdrop.wid >= 0) && ((dragdrop.source.class == 'hSizer') || (dragdrop.source.class == 'xSizer'))) {
@@ -2563,10 +2558,7 @@ var appstyle = (function() {
             ctx.rect(ofs.x, ofs.y, ofs.w, ofs.h);
             ctx.clip();
             if (win.paintPane) {
-/*              var scrpos = {x: 0, y: 0};
-              if (widg && win.storage) {*/
               var scrpos = getCharPos(win, win.storage[widg.storage].originX, win.storage[widg.storage].originY);
-//              }
               var pane = {
                 widget: widg,
                 pixelOriginX: scrpos.x,
@@ -2705,7 +2697,7 @@ var appstyle = (function() {
         }
         var winClass = prompt('Window Class:', '');
         if (winClass != null) {
-          if (winClss != '') {
+          if (winClass != '') {
             opts.class = winClass;
           }
           // spawn a new window
