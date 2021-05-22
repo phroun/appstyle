@@ -85,7 +85,12 @@ You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Cl
 #### Window Manager Events
   * [close](docs/events/close.md) - fired when the close button in the upper corner of the window is activated
 
-#### Mouse Evnts
+#### Keyboard Events
+  * [keyDown](docs/events/keyDown.md) - fired when a keyboard key is pressed down
+  * [keyUp](docs/events/keyUp.md) - fired when a keyboard key is released
+  * [keyPress](docs/events/keyPress.md) - fired when a keyboard key is pressed and released, or when the key auto-repeats due to being held down continuously
+
+#### Mouse Events
   * [mouseDown](docs/events/mouseDown.md) - fired when the mouse button is pressed down
   * [mouseUp](docs/events/mouseUp.md) - fired when the mouse button is released
   * [click](docs/events/click.md) - fired when the mouse is released on the same widget where it was pressed down
@@ -102,8 +107,3 @@ You'll need to write an [Event Handler](docs/EventHandler.md) for your Window Cl
   * [focusNext](docs/events/focusNext.md) - fired when focus is supposed to go to the next interactive widget in squence
   * [focusPrior](docs/events/focusPrior.md) - fired when focus is supposed to go to the prior interactive widget in sequence
   * [focusLast](docs/events/focusLast.md) - fired when focus is supposed to go to the last interactive widget in sequence
-
-#### Keyboard Events
-  * [keyDown](docs/events/keyDown.md) - fired when a keyboard key is pressed down
-  * [keyUp](docs/events/keyUp.md) - fired when a keyboard key is released
-  * [keyPress](docs/events/keyPress.md) - fired when a keyboard key is pressed and released, or when the key auto-repeats due to being held down continuously
