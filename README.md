@@ -39,7 +39,7 @@ Note: If you want your code to run without dependency on Internet access, you sh
 
 When you use [appstyle.registerWindowClass()](docs/registerWindowClass.md) you get to specify some callbacks that let you define and override functionality of an appstyle window:
 
-  * [widgets(win)](docs/callbacks/widgets.md) - this defines the layout of a window
+  * [widgets(win)](docs/callbacks.md#widgets) - this defines the layout of a window
   * [event(win, evt)](docs/callbacks/event.md) - this lets you respond to things such as user interaction (buttons being clicked, etc.)
   * [paint(win, ctx)](docs/callbacks/paint.md) - for changing the behavior of a how a window is painted.
   * [paintPane(win, ctx, pane)](docs/callbacks/paintPane.md) - for changing the behavior of how a pane is painted.
