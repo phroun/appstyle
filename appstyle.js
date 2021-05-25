@@ -1,5 +1,5 @@
 /*!
- * appstyle JavaScript Library v1.0.2b
+ * appstyle JavaScript Library v1.0.4
  * https://github.com/phroun/appstyle
  *
  * Copyright Jeffrey R. Day and other contributors
@@ -80,8 +80,8 @@ var appstyle = (function() {
   var boundsHideMouse = false;
   var lastFocusWid = -1;
   var lastFocusId = -1;
-  var panelDepth = 0;
   var windowList = [];
+  var widgetClasses = {};
   var windowClasses = {};
   var eventDispatcher = {};
   var modalCallback = false;
@@ -340,8 +340,18 @@ var appstyle = (function() {
   }
   
   var canWidgetFocus = function(win, widget) {
-    return ((widget.class == 'textInput')
-    && (widget.id > ''));
+    var wc;
+    if (widget && widget.class) {
+      wc = widgetClasses[widget.class];
+    }
+    var canFocus = false;
+    if (wc && wc.canFocus) {
+      canFocus = wc.canFocus(win, widget);
+      if (typeof canFocus == "undefinned") {
+        canFocus = false;
+      }
+    }
+    return canFocus;
   }
   
   var getCharPos = function(win, x, y) {
@@ -357,7 +367,7 @@ var appstyle = (function() {
     var ry = 0;
     rx = (x / win.private.charWidth) - win.private.charOffsetX;
     ry = (y / win.private.charHeight) - win.private.charOffsetY;
-    if (typeof truncate != "undefined") {
+    if ((typeof truncate != "undefined") && truncate) {
       rx = Math.floor(rx);
       ry = Math.floor(ry);
     }
@@ -365,7 +375,7 @@ var appstyle = (function() {
   }
   
   function getWidgetIndexById(win, widgetId) {
-    if (win.private && win.private.widgets) {
+    if (win && win.private && win.private.widgets) {
       for (var i=0; i < win.private.widgets.length; i++) {
         if (win.private.widgets[i].id == widgetId) {
           return i;
@@ -476,24 +486,13 @@ var appstyle = (function() {
         true)) {
           var widg = win.private.widgets[i];
           r = getWidgetReference(win, i);
-          if ((widg.class == 'pane')
-            && (widg.id != '')
-          ) {
-            var wpos = {x: 0, y: 0};
-
-            if ((typeof widg.storage != "undefined")
-            && (widg.storage != '')
-            && (typeof win.storage[widg.storage] != "undefined")) {
-              if (typeof win.storage[widg.storage].originX != "undefined") {
-                wpos.x = win.storage[widg.storage].originX;
-              }
-              if (typeof win.storage[widg.storage].originY != "undefined") {
-                wpos.y = win.storage[widg.storage].originY;
-              }
+          
+          var wc = widgetClasses[widg.class];
+          if (wc && wc.getWidgetAtPos) {
+            var cr = wc.getWidgetAtPos(win, widg, mpos.x, mpos.y, r);
+            if (typeof cr != "undefined") {
+              r = cr;
             }
-
-            var spos = getCharPos(win, wpos.x, wpos.y);
-            r = getWidgetAtPos(win, mpos.x + 0*spos.x, mpos.y + 0*spos.y, r);
           }
         }
       }
@@ -1079,6 +1078,9 @@ var appstyle = (function() {
     if (typeof win.private.originY == "undefined") {
       win.private.originY = 0;
     }
+    if (typeof win.private.panelDepth == "undefined") {
+      win.private.panelDepth = 0;
+    }
     if (typeof win.private.cw == "undefined") {
       win.private.cw = win.w;
     }
@@ -1139,9 +1141,14 @@ var appstyle = (function() {
       tw = Math.min(maxw, tw);
       win.private.w = tw;
       win.private.h = th;
+      var cfp = getCharFromPos(win, tw, th, false);
+      win.vw = cfp.x;
+      win.vh = cfp.y;      
     } else {
       win.private.w = Math.floor(Math.min(c.width - 10*options.uiScaleFactor, Math.max(50, tw)));
       win.private.h = Math.floor(Math.min(c.height - 10*options.uiScaleFactor - win.private.titleBarHeight, Math.max(1, th)));
+      win.vw = win.private.w;
+      win.vh = win.private.h;
     }
 
     var sizerThickness = originalScale*12;
@@ -1167,7 +1174,10 @@ var appstyle = (function() {
 
     var keys = [];
     var buckets = [];
-    for (i=0; i < windowList.length; i++) {
+    for (var i=0; i < windowList.length; i++) {
+      if (windowList[i].metrics) {
+        windowList[i].metrics(windowList[i]);
+      }
       processWindowMetrics(windowList[i]);
       windowList[i].private.wid = i;
       if (typeof buckets['z' + padZ(windowList[i].z)] == "undefined") {
@@ -1181,10 +1191,10 @@ var appstyle = (function() {
     mouseOverWid = -1;
     var lk = -1;
     
-    for (i=0; i < keys.length; i++) {
+    for (var i=0; i < keys.length; i++) {
       if (keys[i] != lk) {
         lk = keys[i];
-        for (j=0; j < buckets[lk].length; j++) {
+        for (var j=0; j < buckets[lk].length; j++) {
           var wid = buckets[lk][j];
           windowList[wid].private.mouseInFlag = false;
           if (!windowList[wid].private.closed) {
@@ -1210,10 +1220,10 @@ var appstyle = (function() {
 
     var lk = -1;
     var newz = 0;
-    for (i=0; i < keys.length; i++) {
+    for (var i=0; i < keys.length; i++) {
       if (keys[i] != lk) {
         lk = keys[i];
-        for (j=0; j < buckets[lk].length; j++) {
+        for (var j=0; j < buckets[lk].length; j++) {
           var wid = buckets[lk][j];
           newz++;
           windowList[wid].z = newz;
@@ -1324,7 +1334,9 @@ var appstyle = (function() {
         }
       }
       if (focused.tagName == 'BODY') {
-        $('#focus_rest').focus();
+        if ( window.location == window.parent.location ) { // allow fiddle
+          $('#focus_rest').focus();
+        }
       }
     }
     
@@ -1341,7 +1353,7 @@ var appstyle = (function() {
     }
 
 
-    cursorType = 0;
+    cursorType = -1;
     var clipper = document.getElementById('clipper');
     clipper.scrollTop = 0;
     clipper.scrollLeft = 0;
@@ -1377,8 +1389,7 @@ var appstyle = (function() {
       || (win.private.mouseElement.class == 'hSizer')
       || (win.private.mouseElement.class == 'vSizer')
       || (win.private.mouseElement.class == 'xSizer')
-      || (win.private.mouseElement.class == 'closeBtn')
-      || (win.private.mouseElement.class == 'textInput')) {
+      || (win.private.mouseElement.class == 'closeBtn')) {
         if ((dragdrop.wid == -1) || (dragdrop.wid == mouseOverWid)) {
           cursorType = 0;
           if (win.private.mouseElement.class == 'hSizer') {
@@ -1390,15 +1401,25 @@ var appstyle = (function() {
           if (win.private.mouseElement.class == 'xSizer') {
             cursorType = 4;
           }
-          if (win.private.mouseElement.class == 'textInput') {
-            cursorType = 5;
-          }
         }
       } else {
-        if (typeof win.cursor != "undefined") {
-          cursorType = win.cursor;
+        var wc = widgetClasses[win.private.mouseElement.class];
+        if (wc && wc.getMouseCursor) {
+          var widg = win.private.widgets[win.private.mouseElement.currentIndex];
+          var widgCursorType = wc.getMouseCursor(win, ctx, widg);
+          if (typeof widgCursorType != "undefined") {
+            cursorType = widgCursorType;
+          }
+        }
+        if (cursorType == -1) {
+          if (typeof win.cursor != "undefined") {
+            cursorType = win.cursor;
+          }
         }
       }
+    }
+    if (cursorType == -1) {
+      cursorType = 0;
     }
     
     if (options.useSystemCursor) {
@@ -1734,7 +1755,8 @@ var appstyle = (function() {
           win.private.focusWidget = getWidgetReference(win, -1);
           win.private.focusWidgetWait = false;
         }
-        if (win.private.mouseElement.class == 'textInput') {
+        var widg = win.private.widgets[win.private.mouseElement.currentIndex];
+        if (widg && canWidgetFocus(win, widg)) {
           win.private.focusWidget = win.private.mouseElement;
           win.private.focusWidgetWait = true;
         } else {
@@ -1754,11 +1776,9 @@ var appstyle = (function() {
             if (typeof widg[win.private.mouseElement.currentIndex] != "undefined") {
               var widget = widg[win.private.mouseElement.currentIndex];
               var pos = getWidgetPos(win, widget, true);
-              if ((widget.class == 'text') || (widget.class == 'button')) {
-                dragdrop.ec = widget.caption;
-              }
-              if (widget.class == 'textInput') {
-                dragdrop.ec = widget.storage;
+              var wc = widgetClasses[widget.class];
+              if (wc && wc.inspectorText) {
+                dragdrop.ec = wc.inspectorText(win, widget);
               }
               dragdrop.ex = pos.x;
               dragdrop.ey = pos.y;
@@ -1986,23 +2006,13 @@ var appstyle = (function() {
       win.private.cx = Math.floor(Math.min(c.width - 80*options.uiScaleFactor, Math.max(0, win.x)));
       win.private.cy = Math.floor(Math.min(c.height - 30*options.uiScaleFactor, Math.max(0, win.y)));
     }
-    
-    if ((dragdrop.wid >= 0)
-    && (dragdrop.source.class == 'pane')
-    && (dragdrop.source.id != '')) {
+
+    if (dragdrop.source && (dragdrop.wid >= 0)) {
       var win = windowList[dragdrop.wid];
-      var widget = getWidgetById(win, dragdrop.source.id);
-      if (typeof win.storage[widget.storage] == "undefined") {
-        win.storage[widget.storage] = {originX: 0, originY: 0};
+      var wc = widgetClasses[dragdrop.source.class];
+      if (wc && wc.dragging && win && win.private) {
+        wc.dragging(win, getWidgetById(win, dragdrop.source.id));
       }
-      if (typeof win.private.dragMemoX == "undefined") {
-        win.private.dragMemoX = win.storage[widget.storage].originX;
-        win.private.dragMemoY = win.storage[widget.storage].originY;
-      }
-      var mpos = getCharFromPos(win, mouseX, mouseY);
-      var dpos = getCharFromPos(win, dragdrop.x, dragdrop.y);
-      win.storage[widget.storage].originX = win.private.dragMemoX - (mpos.x - dpos.x);
-      win.storage[widget.storage].originY = win.private.dragMemoY - (mpos.y - dpos.y);
     }
     
     if ((dragdrop.wid >= 0) && ((dragdrop.source.class == 'hSizer') || (dragdrop.source.class == 'xSizer'))) {
@@ -2082,6 +2092,9 @@ var appstyle = (function() {
       });
     }
   }
+
+
+  /* ##### textInput Widget Functions ########################## */
   
   function ev_textfocus() {
     inputHideMouse = true;
@@ -2112,225 +2125,6 @@ var appstyle = (function() {
     }
   }
 
-  // Options
-  const decimalPlaces    = 2;
-  const updateEachSecond = 1;
-
-  // Cache values
-  const decimalPlacesRatio = Math.pow(10, decimalPlaces);
-  let timeMeasurements     = [];
-  
-  function animationFrame(ev) {
-    timeMeasurements.push(performance.now());
-
-    const msPassed = timeMeasurements[timeMeasurements.length - 1] - timeMeasurements[0];
-
-    if (msPassed >= updateEachSecond * 1000) {
-      fps = Math.round(timeMeasurements.length / msPassed * 1000 * decimalPlacesRatio) / decimalPlacesRatio;
-      timeMeasurements = [];
-    }
-
-    var c = document.getElementById('myCanvas');
-    updateCanvas(c);
-    window.requestAnimationFrame(animationFrame)    
-  }
-  
-  function addPropsToObject(o, props) {
-    if (typeof props != "undefined") {
-      for (const key in props) {
-        if (props.hasOwnProperty(key)) {
-          o[key] = props[key];
-        }
-      }
-    }
-  }
-  
-  var setWidgetDefaults = function(win, props) {
-    var o = {}
-    addPropsToObject(o, props);
-    win.private.defaultProps = props;
-  }
-  
-  var custom = function(win, className, props) {
-    var o = {
-      id: "",
-      class: className
-    }
-    addPropsToObject(o, win.private.defaultProps);
-    addPropsToObject(o, props);
-    win.private.widgets.push(o);
-  }
-
-  var text = function(win, caption, props) {
-    var o = {
-      id: "",
-      class: "text",
-      caption: caption
-    }
-    addPropsToObject(o, win.private.defaultProps);
-    addPropsToObject(o, props);
-    if (typeof o.h == "undefined") {
-      o.h = 1;
-    }
-    if (typeof o.graven == "undefined") {
-      o.graven = true;
-    }
-    win.private.widgets.push(o);
-  }
-
-  var textLn = function(win, caption, props) {
-    var o = {
-      id: "",
-      class: "text",
-      caption: caption
-    }
-    addPropsToObject(o, win.private.defaultProps);
-    addPropsToObject(o, props);
-    if (typeof o.h == "undefined") {
-      o.h = 1;
-    }
-    if (typeof o.graven == "undefined") {
-      o.graven = true;
-    }
-    win.private.widgets.push(o);
-    win.private.defaultProps.y = o.y + 1;
-    win.private.defaultProps.x = 0;
-  }
-  
-  var pane = function(win, storage, props) {
-    var o = {
-      id: storage,
-      class: 'pane',
-      x: 20,
-      y: 20,
-      w: 300,
-      h: 200,
-      pixel:true,
-      storage: storage
-    };
-    addPropsToObject(o, win.private.defaultProps);
-    addPropsToObject(o, props);
-    if (typeof o.x == "undefined") {
-      o.x = 0;
-    }
-    if (typeof o.y == "undefined") {
-      o.y = 0;
-    }
-    if (typeof o.h == "undefined") {
-      o.h = win.h;
-    }
-    if (typeof o.w == "undefined") {
-      o.w = win.w;
-    }
-    win.private.widgets.push(o);
-  }
-
-  var button = function(win, id, caption, props) {
-    var o = {
-      id: id,
-      class: "button",
-      caption: caption
-    }
-    addPropsToObject(o, win.private.defaultProps);
-    addPropsToObject(o, props);
-    if (typeof o.h == "undefined") {
-      o.h = 1.5;
-    }
-    win.private.widgets.push(o);
-  }
-  
-  var textInput = function(win, storage, defaultValue, props) {
-    var dv = defaultValue;
-    if (typeof dv == "undefined") {
-      dv = '';
-    }
-    if ((typeof win.storage[storage] == "undefined")
-    || (typeof win.storage[storage].value == "undefined")) {
-      win.storage[storage] = {value: dv};
-    }
-    var o = {
-      class: "textInput",
-      id: storage,
-      storage: storage
-    }
-    addPropsToObject(o, win.private.defaultProps);
-    addPropsToObject(o, props);
-    if (typeof o.h == "undefined") {
-      o.h = 1;
-    }
-    win.private.widgets.push(o);
-  }
-  
-  var drawBackground = function(win, ctx) {
-    // overfill the background to verify that the clipping rectangle is good
-    if (win.private.active) {
-      ctx.fillStyle = theme.colorActiveBack;
-    } else {
-      ctx.fillStyle = theme.colorInactiveBack;
-    }
-    ctx.beginPath();
-    ctx.rect(0 - 10, 0 - 10, win.private.w + 20, win.private.h + 20);
-    ctx.fill();
-    if (win.charGrid) {
-      if (win.private.active) {
-        ctx.strokeStyle = theme.colorActiveCharGrid;
-      } else {
-        ctx.strokeStyle = theme.colorInactiveCharGrid;
-      }
-      var xo = Math.floor(win.private.charOffsetX * win.private.charWidth);
-      var x = 0;
-      while (xo + x*win.private.charWidth < win.private.w) {
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(xo + x*win.private.charWidth - 0, 0);
-        ctx.lineTo(xo + x*win.private.charWidth - 0, win.private.h);
-        ctx.stroke();
-        x++;
-      }
-      var yo = Math.floor(win.private.charOffsetY * win.private.charHeight);
-      var y = 0;
-      while (yo + y*win.private.charHeight < win.private.h) {
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(0, yo + y*win.private.charHeight - 0);
-        ctx.lineTo(win.private.w, yo + y*win.private.charHeight - 0);
-        ctx.stroke();
-        y++;
-      }
-    }
-  }
-  
-  var drawText = function(win, ctx, x, y, w, h, caption) {
-    ctx.font = (h * 0.76) + 'px ' + windowFontName;
-    if (win.private.active) {
-      ctx.fillStyle = theme.colorActiveTextFore;
-    } else {
-      ctx.fillStyle = theme.colorInactiveTextFore;
-    }
-    ctx.beginPath();
-    ctx.fillText(caption,
-      x,
-      y + (0.12 * h),
-      w
-    );
-  }
-  var drawTextCentered = function(win, ctx, x, y, w, h, caption) {
-    ctx.font = (h * 0.76) + 'px ' + windowFontName;
-    if (win.private.active) {
-      ctx.fillStyle = theme.colorActiveTextFore;
-    } else {
-      ctx.fillStyle = theme.colorInactiveTextFore;
-    }
-    ctx.beginPath();
-    var text = ctx.measureText(caption);
-    var textwidth = text.width;
-    ctx.fillText(caption,
-      x + ((w - textwidth) / 2),
-      y + (0.12 * h),
-      w
-    );
-  }
-  
   function drawTextInput(win, ctx, x, y, w, h, storage, id) {
     var ids = id;
     if ((typeof ids == "undefined") || (ids == '')) {
@@ -2458,6 +2252,195 @@ var appstyle = (function() {
     }
   }
   
+  var textInput = function(win, storage, defaultValue, props) {
+    var dv = defaultValue;
+    if (typeof dv == "undefined") {
+      dv = '';
+    }
+    if ((typeof win.storage[storage] == "undefined")
+    || (typeof win.storage[storage].value == "undefined")) {
+      win.storage[storage] = {value: dv};
+    }
+    var o = {
+      class: "textInput",
+      id: storage,
+      storage: storage
+    }
+    addPropsToObject(o, win.private.defaultProps);
+    addPropsToObject(o, props);
+    if (typeof o.h == "undefined") {
+      o.h = 1;
+    }
+    win.private.widgets.push(o);
+  }
+  
+  /* ##### end textInput Widget Functions ############### */
+
+
+  // Options
+  const decimalPlaces    = 2;
+  const updateEachSecond = 1;
+
+  // Cache values
+  const decimalPlacesRatio = Math.pow(10, decimalPlaces);
+  let timeMeasurements     = [];
+  
+  function animationFrame(ev) {
+    timeMeasurements.push(performance.now());
+
+    const msPassed = timeMeasurements[timeMeasurements.length - 1] - timeMeasurements[0];
+
+    if (msPassed >= updateEachSecond * 1000) {
+      fps = Math.round(timeMeasurements.length / msPassed * 1000 * decimalPlacesRatio) / decimalPlacesRatio;
+      timeMeasurements = [];
+    }
+
+    var c = document.getElementById('myCanvas');
+    updateCanvas(c);
+    window.requestAnimationFrame(animationFrame)    
+  }
+  
+  function addPropsToObject(o, props) {
+    if (typeof props != "undefined") {
+      for (const key in props) {
+        if (props.hasOwnProperty(key)) {
+          o[key] = props[key];
+        }
+      }
+    }
+  }
+  
+  var setWidgetDefaults = function(win, props) {
+    var o = {}
+    addPropsToObject(o, props);
+    win.private.defaultProps = props;
+  }
+  
+  var custom = function(win, className, props) {
+    var o = {
+      id: "",
+      class: className
+    }
+    addPropsToObject(o, win.private.defaultProps);
+    addPropsToObject(o, props);
+    win.private.widgets.push(o);
+  }
+
+  var text = function(win, caption, props) {
+    var o = {
+      id: "",
+      class: "text",
+      caption: caption
+    }
+    addPropsToObject(o, win.private.defaultProps);
+    addPropsToObject(o, props);
+    if (typeof o.h == "undefined") {
+      o.h = 1;
+    }
+    if (typeof o.graven == "undefined") {
+      o.graven = true;
+    }
+    win.private.widgets.push(o);
+  }
+
+  var textLn = function(win, caption, props) {
+    var o = {
+      id: "",
+      class: "text",
+      caption: caption
+    }
+    addPropsToObject(o, win.private.defaultProps);
+    addPropsToObject(o, props);
+    if (typeof o.h == "undefined") {
+      o.h = 1;
+    }
+    if (typeof o.graven == "undefined") {
+      o.graven = true;
+    }
+    win.private.widgets.push(o);
+    win.private.defaultProps.y = o.y + 1;
+    win.private.defaultProps.x = 0;
+  }
+  
+  
+  var drawBackground = function(win, ctx) {
+    // overfill the background to verify that the clipping rectangle is good
+    if (win.private.active) {
+      ctx.fillStyle = theme.colorActiveBack;
+    } else {
+      ctx.fillStyle = theme.colorInactiveBack;
+    }
+    ctx.beginPath();
+    ctx.rect(0 - 10, 0 - 10, win.private.w + 20, win.private.h + 20);
+    ctx.fill();
+    if (win.charGrid) {
+      if (win.private.active) {
+        ctx.strokeStyle = theme.colorActiveCharGrid;
+      } else {
+        ctx.strokeStyle = theme.colorInactiveCharGrid;
+      }
+      var xo = Math.floor(win.private.charOffsetX * win.private.charWidth);
+      var x = 0;
+      while (xo + x*win.private.charWidth < win.private.w) {
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(xo + x*win.private.charWidth - 0, 0);
+        ctx.lineTo(xo + x*win.private.charWidth - 0, win.private.h);
+        ctx.stroke();
+        x++;
+      }
+      var yo = Math.floor(win.private.charOffsetY * win.private.charHeight);
+      var y = 0;
+      while (yo + y*win.private.charHeight < win.private.h) {
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, yo + y*win.private.charHeight - 0);
+        ctx.lineTo(win.private.w, yo + y*win.private.charHeight - 0);
+        ctx.stroke();
+        y++;
+      }
+    }
+  }
+  
+  var drawText = function(win, ctx, x, y, w, h, caption, color) {
+    ctx.font = (h * 0.76) + 'px ' + windowFontName;
+    if (typeof color == "undefined") {
+      if (win.private.active) {
+        ctx.fillStyle = theme.colorActiveTextFore;
+      } else {
+        ctx.fillStyle = theme.colorInactiveTextFore;
+      }
+    } else {
+      ctx.fillStyle = color;
+    }
+    ctx.beginPath();
+    ctx.fillText(caption,
+      x,
+      y + (0.12 * h),
+      w
+    );
+  }
+  var drawTextCentered = function(win, ctx, x, y, w, h, caption, color) {
+    ctx.font = (h * 0.76) + 'px ' + windowFontName;
+    if (typeof color == "undefined") {
+      if (win.private.active) {
+        ctx.fillStyle = theme.colorActiveTextFore;
+      } else {
+        ctx.fillStyle = theme.colorInactiveTextFore;
+      }
+    } else {
+      ctx.fillStyle = color;
+    }
+    ctx.beginPath();
+    var text = ctx.measureText(caption);
+    var textwidth = text.width;
+    ctx.fillText(caption,
+      x + ((w - textwidth) / 2),
+      y + (0.12 * h),
+      w
+    );
+  }
+  
   
   function drawFlatOutline(ctx, ofs, pad, thick, color) {
     ctx.beginPath();
@@ -2550,106 +2533,9 @@ var appstyle = (function() {
           ofs.y = Math.floor(ofs.y) + 0.5;
           ofs.h = Math.floor(ofs.h);
           ofs.w = Math.floor(ofs.w);
-          if (widg.class == 'textInput') {
-            stor = widg.id;
-            drawTextInput(win, ctx, ofs.x, ofs.y, ofs.w, ofs.h, stor);
-          }
-          if (widg.class == 'text') {
-            drawText(win, ctx, ofs.x, ofs.y, ofs.w, ofs.h, widg.caption);
-          }
-          if (widg.class == 'button') {
-            ctx.beginPath();
-            var xpd;
-            xpd = (panelDepth + 8) * 16;
-            var color = 'rgb(' + (xpd*theme.bevelTint[0]) + ',' + (xpd*theme.bevelTint[1]) + ',' + (xpd*theme.bevelTint[2]) + ')';
-            ctx.fillStyle = '#000000';
-            ctx.beginPath();
-            ctx.rect(ofs.x,ofs.y,ofs.w+1,ofs.h+1);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.fillStyle = color;
-            ctx.rect(ofs.x+1,ofs.y+1,ofs.w-1,ofs.h-1);
-            ctx.fill();
-            var thick = Math.ceil(options.uiScaleFactor * 5);
-            if ((win.private.dragdrop) && (win.private.mouseTarget)) {
-              pressed = (win.private.mouseTarget.id == widg.id)
-              && (win.private.mouseTarget.id == dragdrop.source.id);
-            } else {
-              pressed = false;
-            }
-            drawBevel(ctx, ofs, -(thick+2), thick+1, panelDepth+8, (!pressed))
-            var prx = 0;
-            var pry =0;
-            if (pressed) {
-              prx = Math.ceil(thick/2);
-              pry = Math.ceil(thick/2);
-            }
-            drawTextCentered(win, ctx, prx+ofs.x+thick*2+1, pry+ofs.y+thick*2+1,
-            ofs.w-thick*4-2,
-            ofs.h-thick*4-2, widg.caption);
-          }
-          if ((widg.class == 'pane') && (widg.id != '')) {
-            if (typeof win.storage[widg.storage] == "undefined") {
-              win.storage[widg.storage] = {originX: 0, originY: 0};
-            }
-            ctx.beginPath();
-            ctx.rect(ofs.x-2,ofs.y-2,ofs.w+4,ofs.h+4);
-            var needDepth = false;
-            var thick = Math.ceil(options.uiScaleFactor * 5);
-
-            if ((typeof widg.noBackground == "undefined")
-            || (!widg.noBackground)) {
-              panelDepth++;
-              needDepth = true;
-              var xpd = (panelDepth + 1) * 16;
-              ctx.fillStyle = 'rgb(' + (xpd*theme.bevelTint[0]) + ',' +
-              (xpd*theme.bevelTint[1]) + ',' + (xpd*theme.bevelTint[2]) + ')';
-              ctx.fill();
-            }
-
-            if ((typeof widg.noBorder == "undefined")
-            || (!widg.noBorder)) {
-
-              drawBevel(ctx, ofs, 1 + thick*2, thick, panelDepth-1, true)
-              drawBevel(ctx, ofs, 1, thick, panelDepth, false);
-              var xpd;
-              xpd = (panelDepth + 2) * 16;
-              var color = 'rgb(' + (xpd*theme.bevelTint[0]) + ',' + (xpd*theme.bevelTint[1]) + ',' + (xpd*theme.bevelTint[2]) + ')';
-              drawFlatOutline(ctx, ofs, 1+thick, thick, color);
-
-
-            }
-            ctx.save();
-            // set up clip area for the window paint handler
-            ctx.beginPath();
-            ctx.rect(ofs.x, ofs.y, ofs.w, ofs.h);
-            ctx.clip();
-            if (win.paintPane) {
-              var scrpos = getCharPos(win, win.storage[widg.storage].originX, win.storage[widg.storage].originY);
-              var pane = {
-                widget: widg,
-                pixelOriginX: scrpos.x,
-                pixelOriginY: scrpos.y,
-                originX: win.storage[widg.storage].originX,
-                originY: win.storage[widg.storage].originY
-              };
-              ctx.save();
-              ctx.translate(ofs.x,ofs.y);
-              var pp = win.paintPane(win, ctx, pane);
-              ctx.restore();
-              if (typeof pp == "undefined") {
-                pp = true;
-              }
-              if (pp) {
-                drawWidgets(win, ctx, widg.id);
-              }
-            } else {
-              drawWidgets(win, ctx);
-            }
-            ctx.restore();
-            if (needDepth) {
-              panelDepth--;
-            }
+          var wc = widgetClasses[widg.class];
+          if (wc && wc.paint) {
+            wc.paint(win, ctx, widg, ofs);
           }
         }
       }
@@ -2800,12 +2686,12 @@ var appstyle = (function() {
     text(win, dbgLine1, {x: 0, y: 0, h: 0.75, w:14});
     text(win, dbgLine2, {x: 0, y:0.75, h: 0.75, w:20});
     text(win, 'Windows: ' + windowList.length, {x: 0, y: 1.5, h: 0.75, w:20});
-    button(win, 'resetBtn', 'Reset', {x:15, y:-0.1, w:5, h: 1.20});
-    button(win, 'newBtn', 'New', {x:15, y:1, w:5, h: 1.20});
-    button(win, 'saveBtn', 'Save', {x:0, y:2.25, w:5});
-    button(win, 'downBtn', 'Down', {x:5, y:2.25, w:5});
-    button(win, 'upBtn', 'Upload', {x:10, y:2.25, w:5.5});
-    button(win, 'loadBtn', 'Load', {x:15.5, y:2.25, w:4.5});
+    appstyle.button(win, 'resetBtn', 'Reset', {x:15, y:-0.1, w:5, h: 1.20});
+    appstyle.button(win, 'newBtn', 'New', {x:15, y:1, w:5, h: 1.20});
+    appstyle.button(win, 'saveBtn', 'Save', {x:0, y:2.25, w:5});
+    appstyle.button(win, 'downBtn', 'Down', {x:5, y:2.25, w:5});
+    appstyle.button(win, 'upBtn', 'Upload', {x:10, y:2.25, w:5.5});
+    appstyle.button(win, 'loadBtn', 'Load', {x:15.5, y:2.25, w:4.5});
     textLn(win, 'MouseXY: ' + (mouseX+win.private.cx+1) + ', ' +
     (mouseY+win.private.titleBarHeight+win.private.cy+1), {
       x:0, y:3.75, w: 20
@@ -2827,13 +2713,13 @@ var appstyle = (function() {
           var widg = widglist[windowList[mouseOverWid].private.mouseTarget.currentIndex];
           if (typeof widg != "undefined") {
             // interrogate for data
+            
+            var wc = widgetClasses[widg.class];
+            
+            if (wc && wc.inspectorText) {
+              data = wc.inspectorText(windowList[mouseOverWid], widg).substring(0,255);
+            }
 
-            if (widg.class == 'text') {
-              data = widg.caption.substring(0,255);
-            }
-            if (widg.class == 'textInput') {
-              data = widg.storage;
-            }
           } // found widget
         }
       }
@@ -2892,7 +2778,11 @@ var appstyle = (function() {
     }
 
     function handleFileRead(event) {
+        try {
         window.localStorage.setItem(FILE_KEY, event.target.result);
+        } catch (err) {
+          bigFile = event.target.result
+        }
         var t = document.getElementById('previous');
         $('#appstyle_modal').hide();
         $('#appstyle_modal').innerHTML = '';
@@ -2919,6 +2809,10 @@ var appstyle = (function() {
 
     document.body.removeChild(element);
   }
+  
+  var registerWidgetClass = function(name, props) {
+    widgetClasses[name] = props;
+  }
 
   var registerWindowClass = function(name, props) {
     windowClasses[name] = props;
@@ -2933,8 +2827,35 @@ var appstyle = (function() {
     }
   }
 
+  function widgetPaintText(win, ctx, widg, ofs) {
+    drawText(win, ctx, ofs.x, ofs.y, ofs.w, ofs.h, widg.caption, widg.color);
+  }
+  
+  function widgetPaintTextInput(win, ctx, widg, ofs) {
+    stor = widg.id;
+    drawTextInput(win, ctx, ofs.x, ofs.y, ofs.w, ofs.h, stor);
+  }
+  
   var init = function() {
-
+  
+    registerWidgetClass('text', {
+      inspectorText: function(win, widget) {
+        return widget.caption;
+      },
+      paint: widgetPaintText
+    });
+    registerWidgetClass('textInput', {
+      inspectorText: function(win, widget) {
+        return widget.storage;
+      },
+      canFocus: function(win, widget) {
+        return (widget.id > '');
+      },
+      getMouseCursor: function(win, ctx, widget) {
+        return 5;
+      },
+      paint: widgetPaintTextInput
+    });
     registerWindowClass('appstyle.debugger', {
       y: 100, w: 20, h: 14,
       titleBar: true,
@@ -3073,6 +2994,7 @@ $(document).ready(function() {
     drawBackground: drawBackground,
     drawWidgets: drawWidgets,
     drawText: drawText,
+    drawTextCentered: drawTextCentered,
     drawFlatOutline: drawFlatOutline,
     drawBevel: drawBevel,
   
@@ -3085,7 +3007,9 @@ $(document).ready(function() {
     getCharFromPos: getCharFromPos,
     canWidgetFocus: canWidgetFocus,
     isWithinWidget: isWithinWidget,
-
+    registerWidgetClass: registerWidgetClass,
+    getWidgetAtPos: getWidgetAtPos,
+    
     // auxiliary functions
     toggleFullScreen: toggleFullScreen,
     requestUpload: requestUpload,
@@ -3093,13 +3017,12 @@ $(document).ready(function() {
     // widgets:
     text: text,
     textInput: textInput,
-    button: button,
-    pane: pane,
     custom: custom,
 
     // other things
     windowList: windowList,
     windowClasses: windowClasses,
+    widgetClasses: widgetClasses,
     options: options,
     theme: theme,
     internals: {
@@ -3109,7 +3032,221 @@ $(document).ready(function() {
       resetEnvironment: resetEnvironment,
       processWindowMetrics: processWindowMetrics,
       forceRefresh: doResize,
+      addPropsToObject: addPropsToObject,
+      dragdrop: dragdrop
     }
   }
+
+}());
+
+
+appstyle.button = (function() {
+
+  appstyle.registerWidgetClass('button', {
+    inspectorText: function(win, widget) {
+      return widget.caption;
+    },
+    paint: widgetPaintButton
+  });
+
+  function widgetPaintButton(win, ctx, widg, ofs) {
+    ctx.beginPath();
+    var xpd;
+    xpd = (win.private.panelDepth + 8) * 16;
+    var color = 'rgb(' + (xpd*appstyle.theme.bevelTint[0]) + ',' +
+    (xpd*appstyle.theme.bevelTint[1]) + ',' + (xpd*appstyle.theme.bevelTint[2]) + ')';
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.rect(ofs.x,ofs.y,ofs.w+1,ofs.h+1);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.rect(ofs.x+1,ofs.y+1,ofs.w-1,ofs.h-1);
+    ctx.fill();
+    var thick = Math.ceil(appstyle.options.uiScaleFactor * 5);
+    if ((win.private.dragdrop) && (win.private.mouseTarget)) {
+      pressed = (win.private.mouseTarget.id == widg.id)
+      && (win.private.mouseTarget.id == appstyle.internals.dragdrop.source.id);
+    } else {
+      pressed = false;
+    }
+    appstyle.drawBevel(ctx, ofs, -(thick+2), thick+1, win.private.panelDepth+8, (!pressed))
+    var prx = 0;
+    var pry =0;
+    if (pressed) {
+      prx = Math.ceil(thick/2);
+      pry = Math.ceil(thick/2);
+    }
+    appstyle.drawTextCentered(win, ctx, prx+ofs.x+thick*2+1, pry+ofs.y+thick*2+1,
+    ofs.w-thick*4-2,
+    ofs.h-thick*4-2, widg.caption);
+  }  
+
+  var button = function(win, id, caption, props) {
+    var o = {
+      id: id,
+      class: "button",
+      caption: caption
+    }
+    appstyle.internals.addPropsToObject(o, win.private.defaultProps);
+    appstyle.internals.addPropsToObject(o, props);
+    if (typeof o.h == "undefined") {
+      o.h = 1.5;
+    }
+    win.private.widgets.push(o);
+  }
+
+  return button;
+}());
+
+appstyle.pane = (function() {
+
+  var pane = function(win, storage, props) {
+    var o = {
+      id: storage,
+      class: 'pane',
+      x: 20,
+      y: 20,
+      w: 300,
+      h: 200,
+      pixel:false,
+      storage: storage
+    };
+    appstyle.internals.addPropsToObject(o, win.private.defaultProps);
+    appstyle.internals.addPropsToObject(o, props);
+    if (typeof o.horizontalScroll == "undefined") {
+      o.horizontalScroll = false;
+    }
+    if (typeof o.verticalScroll == "undefined") {
+      o.verticalScroll = false;
+    }
+    if (typeof o.x == "undefined") {
+      o.x = 0;
+    }
+    if (typeof o.y == "undefined") {
+      o.y = 0;
+    }
+    if (typeof o.h == "undefined") {
+      o.h = win.h;
+    }
+    if (typeof o.w == "undefined") {
+      o.w = win.w;
+    }
+    win.private.widgets.push(o);
+  }
+
+  function widgetPaintPane(win, ctx, widg, ofs) {
+    if (widg.id != '') {
+      if (typeof win.storage[widg.storage] == "undefined") {
+        win.storage[widg.storage] = {originX: 0, originY: 0};
+      }
+      ctx.beginPath();
+      ctx.rect(ofs.x-2,ofs.y-2,ofs.w+4,ofs.h+4);
+      var needDepth = false;
+      var thick = Math.ceil(appstyle.options.uiScaleFactor * 5);
+
+      if ((typeof widg.noBackground == "undefined")
+      || (!widg.noBackground)) {
+        win.private.panelDepth++;
+        needDepth = true;
+        var xpd = (win.private.panelDepth + 1) * 16;
+        ctx.fillStyle = 'rgb(' + (xpd*appstyle.theme.bevelTint[0]) + ',' +
+        (xpd*appstyle.theme.bevelTint[1]) + ',' + (xpd*appstyle.theme.bevelTint[2]) + ')';
+        ctx.fill();
+      }
+
+      if ((typeof widg.noBorder == "undefined")
+      || (!widg.noBorder)) {
+
+        appstyle.drawBevel(ctx, ofs, 1 + thick*2, thick, win.private.panelDepth-1, true)
+        appstyle.drawBevel(ctx, ofs, 1, thick, win.private.panelDepth, false);
+        var xpd;
+        xpd = (win.private.panelDepth + 2) * 16;
+        var color = 'rgb(' + (xpd*appstyle.theme.bevelTint[0]) + ',' +
+        (xpd*appstyle.theme.bevelTint[1]) + ',' + (xpd*appstyle.theme.bevelTint[2]) + ')';
+        appstyle.drawFlatOutline(ctx, ofs, 1+thick, thick, color);
+      }
+      ctx.save();
+      // set up clip area for the window paint handler
+      ctx.beginPath();
+      ctx.rect(ofs.x, ofs.y, ofs.w, ofs.h);
+      ctx.clip();
+      if (win.paintPane) {
+        var scrpos = appstyle.getCharPos(win, win.storage[widg.storage].originX, win.storage[widg.storage].originY);
+        var pane = {
+          widget: widg,
+          pixelOriginX: scrpos.x,
+          pixelOriginY: scrpos.y,
+          originX: win.storage[widg.storage].originX,
+          originY: win.storage[widg.storage].originY
+        };
+        ctx.save();
+        ctx.translate(ofs.x,ofs.y);
+        var pp = win.paintPane(win, ctx, pane);
+        ctx.restore();
+        if (typeof pp == "undefined") {
+          pp = true;
+        }
+        if (pp) {
+          appstyle.drawWidgets(win, ctx, widg.id);
+        }
+      } else {
+        appstyle.drawWidgets(win, ctx, widg.id);
+      }
+      ctx.restore();
+      if (needDepth) {
+        win.private.panelDepth--;
+      }
+    }
+  }
+
+  function paneGetWidgetAtPos(win, widg, x, y, parentReference) {
+    if (widg.id != '') {
+      var wpos = {x: 0, y: 0};
+
+      if ((typeof widg.storage != "undefined")
+      && (widg.storage != '')
+      && (typeof win.storage[widg.storage] != "undefined")) {
+        if (typeof win.storage[widg.storage].originX != "undefined") {
+          wpos.x = win.storage[widg.storage].originX;
+        }
+        if (typeof win.storage[widg.storage].originY != "undefined") {
+          wpos.y = win.storage[widg.storage].originY;
+        }
+      }
+
+      var spos = appstyle.getCharPos(win, wpos.x, wpos.y);
+      r = appstyle.getWidgetAtPos(win, x + 0*spos.x, y + 0*spos.y, parentReference);
+    }
+    return r;
+  }
+
+  function widgetPaneDragging(win) {
+    var win = appstyle.windowList[appstyle.internals.dragdrop.wid];
+    var widget = appstyle.getWidgetById(win, appstyle.internals.dragdrop.source.id);
+    if (typeof win.storage[widget.storage] == "undefined") {
+      win.storage[widget.storage] = {originX: 0, originY: 0};
+    }
+    if (typeof win.private.dragMemoX == "undefined") {
+      win.private.dragMemoX = win.storage[widget.storage].originX;
+      win.private.dragMemoY = win.storage[widget.storage].originY;
+    }
+    var mousePos = appstyle.getMousePos();
+    var mpos = appstyle.getCharFromPos(win, mousePos.x, mousePos.y);
+    var dpos = appstyle.getCharFromPos(win, appstyle.internals.dragdrop.x, appstyle.internals.dragdrop.y);
+    if (widget.horizontalScroll) {
+      win.storage[widget.storage].originX = win.private.dragMemoX - (mpos.x - dpos.x);
+    }
+    if (widget.verticalScroll) {
+      win.storage[widget.storage].originY = win.private.dragMemoY - (mpos.y - dpos.y);
+    }
+  }
+
+  appstyle.registerWidgetClass('pane', {
+    paint: widgetPaintPane,
+    getWidgetAtPos: paneGetWidgetAtPos,
+    dragging: widgetPaneDragging
+  });
   
+  return pane;
 }());
