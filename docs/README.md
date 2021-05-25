@@ -13,7 +13,6 @@
  * [Mouse Events](mouse-events.md)
  * [Focus and Focus Events](focus.md)
  * [Widget State Storage](storage.md)
-
 ### Widget Library
 
 * [text](widgets/README.md#text)
@@ -26,6 +25,11 @@
 * [radioButton](widgets/README.md#radio-button) - not complete
 * [stepper](widgets/README.md#stepper) - not complete
 * [slider](widgets/README.md#slider) - not complete
+
+### Widget Development Reference
+
+* [registerWidgetClass()](creating-widgets.md#register-widget-class)
+* [Widget Class Callbacks](creating-widgets.md#widget-class-callbacks)
 
 ### Other Reference
 
