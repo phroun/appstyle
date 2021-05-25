@@ -47,6 +47,7 @@ myWidgetLibrary.fancyButton = (function () {
 
   return fancyButton;
 }());
+```
 
 ## Widget Class Callbacks
 
