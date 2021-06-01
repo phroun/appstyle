@@ -1,12 +1,13 @@
 /*!
- * appstyle JavaScript Library v1.0.5
+ * appstyle JavaScript Library v1.0.6
  * https://github.com/phroun/appstyle
  *
  * Copyright Jeffrey R. Day and other contributors
  * Released under the MIT license
  * https://github.com/phroun/appstyle/blob/main/LICENSE
  *
- * Date: 2021-05-22T16:50Z
+ * First Release: 2021-05-22T16:50Z
+ * Last Updated:  2021-06-01
  */
 
 var appstyle = (function() {
@@ -60,7 +61,6 @@ var appstyle = (function() {
   var pixZoomFactor = 1;
   var superFullScreen = false
   var dpr = 1;
-  var fps = 0;
   var systemDPR = 1;
   var sizerThickness = 5;
   var mouseX = -100;
@@ -69,7 +69,6 @@ var appstyle = (function() {
   var minScaleFactor = 0.25;
   var toolFrameSize = 0.73;
   var halfPixel = true;
-  var mouseOverWid = -1;
   var mouseCaptureWid = -1;
   var focusWid = -1;
   var focusWidget = getWidgetReference(false, -1);
@@ -89,7 +88,9 @@ var appstyle = (function() {
   
   var internalState = {
     inputHideMouse: false,
-    boundsHideMouse: false
+    boundsHideMouse: false,
+    mouseOverWid: -1,
+    fps: 1,
   }
 
   function isEmpty(obj) { 
@@ -475,21 +476,25 @@ var appstyle = (function() {
     win.private.widgets = [];
 
     if (!(win.private.collapsed)) {
-      // Outer Window Frame
-      ctx.strokeStyle = theme.colorOutline;
-      ctx.beginPath();
-      ctx.rect(win.private.cx-1,win.private.cy-1,win.private.w + 3 + win.private.hSizer, win.private.h + 3 + win.private.titleBarHeight + win.private.vSizer);
-      ctx.stroke();
-      
-      // Inner Window Frame
-      ctx.beginPath();
-      ctx.rect(win.private.cx, win.private.cy, win.private.w + 1 + win.private.hSizer, win.private.h + 1 + win.private.titleBarHeight + win.private.vSizer);
-      if (win.private.active) {
-        ctx.strokeStyle = theme.colorInlineActive;
-      } else {
-        ctx.strokeStyle = theme.colorInlineInactive;
+    
+      if ((typeof win.windowFrameEdge == "undefined")
+      || (win.windowFrameEdge)) {
+        // Outer Window Frame
+        ctx.strokeStyle = theme.colorOutline;
+        ctx.beginPath();
+        ctx.rect(win.private.cx-1,win.private.cy-1,win.private.w + 3 + win.private.hSizer, win.private.h + 3 + win.private.titleBarHeight + win.private.vSizer);
+        ctx.stroke();
+        
+        // Inner Window Frame
+        ctx.beginPath();
+        ctx.rect(win.private.cx, win.private.cy, win.private.w + 1 + win.private.hSizer, win.private.h + 1 + win.private.titleBarHeight + win.private.vSizer);
+        if (win.private.active) {
+          ctx.strokeStyle = theme.colorInlineActive;
+        } else {
+          ctx.strokeStyle = theme.colorInlineInactive;
+        }
+        ctx.stroke();
       }
-      ctx.stroke();
     }
 
     ctx.translate(win.private.cx, win.private.cy + Math.floor(win.private.titleBarHeight));
@@ -1075,7 +1080,7 @@ var appstyle = (function() {
     }
     keys.sort();
     
-    mouseOverWid = -1;
+    internalState.mouseOverWid = -1;
     var lk = -1;
     
     for (var i=0; i < keys.length; i++) {
@@ -1094,15 +1099,15 @@ var appstyle = (function() {
             && (mouseY < windowList[wid].private.cy + windowList[wid].private.h+2 +
             windowList[wid].private.titleBarHeight +
             windowList[wid].private.vSizer)) {
-              mouseOverWid = wid;
+              internalState.mouseOverWid = wid;
             }
           }
         }
       }
     }
     
-    if (mouseOverWid >= 0) {
-      windowList[mouseOverWid].private.mouseInFlag = true;
+    if (internalState.mouseOverWid >= 0) {
+      windowList[internalState.mouseOverWid].private.mouseInFlag = true;
     }
 
     var lk = -1;
@@ -1269,15 +1274,15 @@ var appstyle = (function() {
 
     drawWindowStack(c, ctx);
 
-    if (((dragdrop.wid == mouseOverWid) || (dragdrop.wid == -1)) && (mouseOverWid != -1)) {
-      var win = windowList[mouseOverWid];
+    if (((dragdrop.wid == internalState.mouseOverWid) || (dragdrop.wid == -1)) && (internalState.mouseOverWid != -1)) {
+      var win = windowList[internalState.mouseOverWid];
       if ((win.private.mouseElement.class == 'titleBar')
       || (win.private.mouseElement.class == 'windowBorder')
       || (win.private.mouseElement.class == 'hSizer')
       || (win.private.mouseElement.class == 'vSizer')
       || (win.private.mouseElement.class == 'xSizer')
       || (win.private.mouseElement.class == 'closeBtn')) {
-        if ((dragdrop.wid == -1) || (dragdrop.wid == mouseOverWid)) {
+        if ((dragdrop.wid == -1) || (dragdrop.wid == internalState.mouseOverWid)) {
           cursorType = 0;
           if (win.private.mouseElement.class == 'hSizer') {
             cursorType = 2;
@@ -1433,9 +1438,9 @@ var appstyle = (function() {
     ev_mousemove(ev);
     if (!isRightMB) {
 
-      if (mouseOverWid >= 0) {
-        bringToTop(mouseOverWid);
-        var win = windowList[mouseOverWid];
+      if (internalState.mouseOverWid >= 0) {
+        bringToTop(internalState.mouseOverWid);
+        var win = windowList[internalState.mouseOverWid];
         if (win.private.mouseElement.class == 'window') {
           win.private.focusWidget = getWidgetReference(win, -1);
           win.private.focusWidgetWait = false;
@@ -1446,9 +1451,9 @@ var appstyle = (function() {
           win.private.focusWidgetWait = true;
         } else {
           if (win.private.mouseElement.class != '') {
-            dragdrop.wid = mouseOverWid;
+            dragdrop.wid = internalState.mouseOverWid;
             $('body').addClass('dragging');
-            windowList[mouseOverWid].private.dragdrop = true;
+            windowList[internalState.mouseOverWid].private.dragdrop = true;
             dragdrop.source = win.private.mouseElement;
             dragdrop.ox = win.private.cx;
             dragdrop.oy = win.private.cy;
@@ -1472,17 +1477,20 @@ var appstyle = (function() {
             dragdrop.y = mouseY;
           }
         }
-        var mpos = getLocalPos(windowList[mouseOverWid], mouseX, mouseY);
+        var mpos = getLocalPos(windowList[internalState.mouseOverWid], mouseX, mouseY);
         if ((mpos.y >= 0) && (mpos.x >= 0)
-        && (mpos.x < windowList[mouseOverWid].private.w)
-        && (mpos.y < windowList[mouseOverWid].private.h)
+        && (mpos.x < windowList[internalState.mouseOverWid].private.w)
+        && (mpos.y < windowList[internalState.mouseOverWid].private.h)
         ) { // only pass content events to handler
-          mouseCaptureWid = mouseOverWid;
-          triggerEvent(windowList[mouseOverWid], {type: 'mouseDown', target: dragdrop.source});
+          mouseCaptureWid = internalState.mouseOverWid;
+          triggerEvent(windowList[internalState.mouseOverWid], {type: 'mouseDown', target: dragdrop.source});
         } else {
-          triggerEvent(windowList[mouseOverWid], {type: 'dragFrame', target: dragdrop.source});
+          triggerEvent(windowList[internalState.mouseOverWid], {type: 'dragFrame', target: dragdrop.source});
         }
       } else {
+        if (focusWid >= 0) {
+          bringToTop(-1, true);
+        }
       }
     }
     var c = document.getElementById('myCanvas');
@@ -1516,11 +1524,11 @@ var appstyle = (function() {
   }
   
   function ev_dblclick(ev) {
-    if (mouseOverWid >= 0) {
-      var r = triggerEvent(windowList[mouseOverWid], {type: 'dblClick', target: windowList[mouseOverWid].private.mouseTarget});
+    if (internalState.mouseOverWid >= 0) {
+      var r = triggerEvent(windowList[internalState.mouseOverWid], {type: 'dblClick', target: windowList[internalState.mouseOverWid].private.mouseTarget});
       if (r) {
-        if (windowList[mouseOverWid].private.mouseTarget.class == 'titleBar') {
-          var win = windowList[mouseOverWid];
+        if (windowList[internalState.mouseOverWid].private.mouseTarget.class == 'titleBar') {
+          var win = windowList[internalState.mouseOverWid];
           if (win.titleBar && (!win.private.collapsed)) {
             win.private.collapsed = true;
             if (win.titleBar) {
@@ -1560,8 +1568,8 @@ var appstyle = (function() {
       $('#myTextOverlay').css({top: '-1000px'});
       focusWidget = getWidgetReference(false, -1);
     }
-    if (mouseOverWid == wid) {
-      mouseOverWid = -1;
+    if (internalState.mouseOverWid == wid) {
+      internalState.mouseOverWid = -1;
     }
     if (focusWid == wid) {
       focusWid = -1;
@@ -1595,11 +1603,11 @@ var appstyle = (function() {
 
         var contentArea = false;
 
-        if (mouseOverWid >= 0) {
-          var mpos = getLocalPos(windowList[mouseOverWid], mouseX, mouseY);
+        if (internalState.mouseOverWid >= 0) {
+          var mpos = getLocalPos(windowList[internalState.mouseOverWid], mouseX, mouseY);
           contentArea = ((mpos.y >= 0) && (mpos.x >= 0)
-          && (mpos.x < windowList[mouseOverWid].private.w)
-          && (mpos.y < windowList[mouseOverWid].private.h)
+          && (mpos.x < windowList[internalState.mouseOverWid].private.w)
+          && (mpos.y < windowList[internalState.mouseOverWid].private.h)
           );
         }
 
@@ -1607,28 +1615,28 @@ var appstyle = (function() {
           triggerEvent(windowList[mouseCaptureWid], {type: 'mouseUp', target: windowList[mouseCaptureWid].private.mouseTarget, captured: true});
         }
 
-        if (mouseOverWid >= 0) {
+        if (internalState.mouseOverWid >= 0) {
           if ((dragdrop.source.id) && (dragdrop.source.id != '')
-          && (dragdrop.source.id == windowList[mouseOverWid].private.mouseTarget.id)
-          && (dragdrop.wid == mouseOverWid)) {
-            triggerEvent(windowList[dragdrop.wid], {type: 'click', target: windowList[mouseOverWid].private.mouseTarget});
+          && (dragdrop.source.id == windowList[internalState.mouseOverWid].private.mouseTarget.id)
+          && (dragdrop.wid == internalState.mouseOverWid)) {
+            triggerEvent(windowList[dragdrop.wid], {type: 'click', target: windowList[internalState.mouseOverWid].private.mouseTarget});
           }
         }
 
-        if (mouseOverWid >= 0) {
+        if (internalState.mouseOverWid >= 0) {
           if (!contentArea) {
-            if (dragdrop.wid == mouseOverWid) {
-              triggerEvent(windowList[mouseOverWid], {type: 'dropFrame', target: windowList[mouseOverWid].private.mouseTarget});
+            if (dragdrop.wid == internalState.mouseOverWid) {
+              triggerEvent(windowList[internalState.mouseOverWid], {type: 'dropFrame', target: windowList[internalState.mouseOverWid].private.mouseTarget});
             } else {
-              triggerEvent(windowList[mouseOverWid], {type: 'dropOnFrame',
+              triggerEvent(windowList[internalState.mouseOverWid], {type: 'dropOnFrame',
                 source: dragdrop.source,
-                target: windowList[mouseOverWid].private.mouseTarget
+                target: windowList[internalState.mouseOverWid].private.mouseTarget
               });
             }
           } else {
-            triggerEvent(windowList[mouseOverWid], {type: 'drop',
+            triggerEvent(windowList[internalState.mouseOverWid], {type: 'drop',
               source: dragdrop.source,
-              target: windowList[mouseOverWid].private.mouseTarget
+              target: windowList[internalState.mouseOverWid].private.mouseTarget
             });
           }
         }
@@ -1982,7 +1990,9 @@ var appstyle = (function() {
     const msPassed = fpsTimeMeasurements[fpsTimeMeasurements.length - 1] - fpsTimeMeasurements[0];
 
     if (msPassed >= fpsUpdateEachSecond * 1000) {
-      fps = Math.round(fpsTimeMeasurements.length / msPassed * 1000 * fpsDecimalPlacesRatio) / fpsDecimalPlacesRatio;
+      internalState.fps = Math.max(1,
+        Math.round(fpsTimeMeasurements.length / msPassed * 1000 * fpsDecimalPlacesRatio) / fpsDecimalPlacesRatio
+      );
       fpsTimeMeasurements = [];
     }
 
@@ -2018,7 +2028,7 @@ var appstyle = (function() {
   }
 
   function widgetPaintText(win, ctx, widg, ofs) {
-    drawText(win, ctx, ofs.x, ofs.y, ofs.w, ofs.h, widg.caption, widg.color);
+    drawText(win, ctx, ofs.x, ofs.y, ofs.w, ofs.h, widg.caption, widg.font, widg.color);
   }
 
   var text = function(win, caption, props) {
@@ -2096,8 +2106,12 @@ var appstyle = (function() {
     }
   }
   
-  var drawText = function(win, ctx, x, y, w, h, caption, color) {
-    ctx.font = (h * 0.76) + 'px ' + windowFontName;
+  var drawText = function(win, ctx, x, y, w, h, caption, font, color) {
+    var fname = windowFontName;
+    if (font) {
+      fname = font;
+    }
+    ctx.font = (h * 0.76) + 'px ' + fname;
     if (typeof color == "undefined") {
       if (win.private.active) {
         ctx.fillStyle = theme.colorActiveTextFore;
@@ -2115,8 +2129,12 @@ var appstyle = (function() {
     );
   }
 
-  var drawTextCentered = function(win, ctx, x, y, w, h, caption, color) {
-    ctx.font = (h * 0.76) + 'px ' + windowFontName;
+  var drawTextCentered = function(win, ctx, x, y, w, h, caption, font, color) {
+    var fname = windowFontName;
+    if (font) {
+      fname = font;
+    }
+    ctx.font = (h * 0.76) + 'px ' + fname;
     if (typeof color == "undefined") {
       if (win.private.active) {
         ctx.fillStyle = theme.colorActiveTextFore;
@@ -2129,6 +2147,9 @@ var appstyle = (function() {
     ctx.beginPath();
     var text = ctx.measureText(caption);
     var textwidth = text.width;
+    if (textwidth > w) {
+      textwidth = w;
+    }
     ctx.fillText(caption,
       x + ((w - textwidth) / 2),
       y + (0.12 * h),
@@ -2291,7 +2312,9 @@ var appstyle = (function() {
             }
             for (const key in zSort) {
               if (zSort.hasOwnProperty(key)) {
-                appstyle.windowList[key].z = zSort[key];
+                if (appstyle.windowList[key]) {
+                  appstyle.windowList[key].z = zSort[key];
+                }
               }
             }
           }
@@ -2370,7 +2393,7 @@ var appstyle = (function() {
     var dbgLine1 = 'Scale: ' + (window.devicePixelRatio || 1).toFixed(1)
     + 'x' + pixZoomFactor
     + 'x' + options.uiScaleFactor.toFixed(2)
-    + ' @' + fps + 'fps';
+    + ' @' + internalState.fps + 'fps';
     var dbgLine2 = c.width + 'x ' + c.height + ' / ' + window.innerWidth + ' x ' + window.innerHeight;
     text(win, dbgLine1, {x: 0, y: 0, h: 0.75, w:14});
     text(win, dbgLine2, {x: 0, y:0.75, h: 0.75, w:20});
@@ -2385,28 +2408,28 @@ var appstyle = (function() {
     (mouseY+win.private.titleBarHeight+win.private.cy+1), {
       x:0, y:3.75, w: 20
     });
-    if (mouseOverWid >= 0) {
-      var vid = windowList[mouseOverWid].private.mouseTarget.id;
+    if (internalState.mouseOverWid >= 0) {
+      var vid = windowList[internalState.mouseOverWid].private.mouseTarget.id;
       if (typeof vid == "undefined") {
         vid = 'âˆ…';
       }
-      textLn(win, 'Targ: [' + mouseOverWid + '] '
-        + windowList[mouseOverWid].private.mouseTarget.class + ' (#'
-        + windowList[mouseOverWid].private.mouseTarget.currentIndex + ': ' + vid + ')', {
+      textLn(win, 'Targ: [' + internalState.mouseOverWid + '] '
+        + windowList[internalState.mouseOverWid].private.mouseTarget.class + ' (#'
+        + windowList[internalState.mouseOverWid].private.mouseTarget.currentIndex + ': ' + vid + ')', {
         w: 20
       });
       var data = 'âˆ…';
-      if (mouseOverWid >= 0) {
-        var widglist = windowList[mouseOverWid].private.widgets;
-        if (windowList[mouseOverWid].private.mouseTarget.currentIndex >= 0) {
-          var widg = widglist[windowList[mouseOverWid].private.mouseTarget.currentIndex];
+      if (internalState.mouseOverWid >= 0) {
+        var widglist = windowList[internalState.mouseOverWid].private.widgets;
+        if (windowList[internalState.mouseOverWid].private.mouseTarget.currentIndex >= 0) {
+          var widg = widglist[windowList[internalState.mouseOverWid].private.mouseTarget.currentIndex];
           if (typeof widg != "undefined") {
             // interrogate for data
             
             var wc = widgetClasses[widg.class];
             
             if (wc && wc.inspectorText) {
-              data = wc.inspectorText(windowList[mouseOverWid], widg).substring(0,255);
+              data = wc.inspectorText(windowList[internalState.mouseOverWid], widg).substring(0,255);
             }
 
           } // found widget
@@ -2458,17 +2481,19 @@ var appstyle = (function() {
     document.querySelector('#fileUpload').addEventListener('change', handleFileUpload, false);
 
     // Setup file reading
+    var fileName = '';
     var reader = new FileReader();
     reader.onload = handleFileRead;
 
     function handleFileUpload(event) {
         var file = event.target.files[0];
+        fileName = file.name.split("\\").pop();
         reader.readAsBinaryString(file); // fires onload when done.
     }
 
     function handleFileRead(event) {
         try {
-        window.localStorage.setItem(FILE_KEY, event.target.result);
+          window.localStorage.setItem(FILE_KEY, event.target.result);
         } catch (err) {
           bigFile = event.target.result
         }
@@ -2477,7 +2502,7 @@ var appstyle = (function() {
         $('#appstyle_modal').innerHTML = '';
         modalCallback = false;
         if (callback) {
-          callback(true);
+          callback(true, fileName);
         }
     }
 
@@ -2649,7 +2674,7 @@ var appstyle = (function() {
   
   function getMousePos(win) {
     var mp = {};
-    if ((typeof win != "undefined") && (win >= 0)) {
+    if ((typeof win != "undefined") && (typeof win.private != "undefined")) {
       mp = getLocalPos(win, mouseX, mouseY);
     } else {
       mp = {x: mouseX, y: mouseY};
@@ -2741,7 +2766,11 @@ appstyle.button = (function() {
     ctx.rect(ofs.x,ofs.y,ofs.w+1,ofs.h+1);
     ctx.fill();
     ctx.beginPath();
-    ctx.fillStyle = color;
+    if ((!widg.flat)
+    || (widg.hover && (appstyle.internals.state.mouseOverWid == win.private.wid) && (win.private.mouseTarget.id == widg.id))
+    || (widg.highlight)) {
+      ctx.fillStyle = color;
+    }
     ctx.rect(ofs.x+1,ofs.y+1,ofs.w-1,ofs.h-1);
     ctx.fill();
     var thick = Math.ceil(appstyle.options.uiScaleFactor * 5);
@@ -2751,16 +2780,24 @@ appstyle.button = (function() {
     } else {
       pressed = false;
     }
-    appstyle.drawBevel(ctx, ofs, -(thick+2), thick+1, win.private.panelDepth+8, (!pressed))
+    if (!widg.flat) {
+      appstyle.drawBevel(ctx, ofs, -(thick+2), thick+1, win.private.panelDepth+8, (!pressed))
+    }
     var prx = 0;
     var pry =0;
     if (pressed) {
       prx = Math.ceil(thick/2);
       pry = Math.ceil(thick/2);
     }
-    appstyle.drawTextCentered(win, ctx, prx+ofs.x+thick*2+1, pry+ofs.y+thick*2+1,
-    ofs.w-thick*4-2,
-    ofs.h-thick*4-2, widg.caption);
+    if (widg.textAlign == 'left') {
+      appstyle.drawText(win, ctx, prx+ofs.x+thick*3+1, pry+ofs.y+thick*2+1,
+      ofs.w-thick*5-2,
+      ofs.h-thick*4-2, widg.caption);
+    } else {
+      appstyle.drawTextCentered(win, ctx, prx+ofs.x+thick*2+1, pry+ofs.y+thick*2+1,
+      ofs.w-thick*4-2,
+      ofs.h-thick*4-2, widg.caption);
+    }
   }  
 
   var button = function(win, id, caption, props) {
@@ -2825,6 +2862,9 @@ appstyle.pane = (function() {
       ctx.rect(ofs.x-2,ofs.y-2,ofs.w+4,ofs.h+4);
       var needDepth = false;
       var thick = Math.ceil(appstyle.options.uiScaleFactor * 5);
+      if (typeof win.private.panelDepth == "undefined") {
+        win.private.panelDepth = 0;
+      }
 
       if ((typeof widg.noBackground == "undefined")
       || (!widg.noBackground)) {
@@ -2838,15 +2878,20 @@ appstyle.pane = (function() {
 
       if ((typeof widg.noBorder == "undefined")
       || (!widg.noBorder)) {
-
-        appstyle.drawBevel(ctx, ofs, 1 + thick*2, thick, win.private.panelDepth-1, true)
-        appstyle.drawBevel(ctx, ofs, 1, thick, win.private.panelDepth, false);
+      
+        if (!widg.flat) {
+          appstyle.drawBevel(ctx, ofs, 1 + thick*2, thick, win.private.panelDepth-1, true)
+          appstyle.drawBevel(ctx, ofs, 1, thick, win.private.panelDepth, false);
+        }
         var xpd;
         xpd = (win.private.panelDepth + 2) * 16;
         var color = 'rgb(' + (xpd*appstyle.theme.bevelTint[0]) + ',' +
         (xpd*appstyle.theme.bevelTint[1]) + ',' + (xpd*appstyle.theme.bevelTint[2]) + ')';
-        appstyle.drawFlatOutline(ctx, ofs, 1+thick, thick, color);
+        if (!widg.flat) {
+          appstyle.drawFlatOutline(ctx, ofs, 1+thick, thick, color);
+        }
       }
+      ctx.beginPath();
       ctx.save();
       // set up clip area for the window paint handler
       ctx.beginPath();
