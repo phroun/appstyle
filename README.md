@@ -73,7 +73,7 @@ Any time you specify a width or height, or the x or y coordinate of a widget wit
 
 ### Writing your Widget Handler
 
-The [Widget Handler](docs/callbacks.md#widgets-handler) for a window gets called every time the screen is painted. Its purpose is to generate the list of widgets that will be used to respond to mouse input and to paint the window.
+The [Widget Handler](docs/callbacks.md#widgets-handler) for a window gets called every time the window needs to be refreshed. This happens frequently, for example, when the window is resized, when the mouse pointer passes over a Widget, or when underlying data has changed. The purpose of the Widget handler is to generate the list of widgets that will be used to respond to future mouse input and to paint the window.
 
 The default paint handler is sufficient to show most of the available stock widgets, so to make a nice looking window, all you usually need to do is write the Widget Handler.
 
@@ -95,7 +95,7 @@ function myWindowWidgets(win) {
 }
 ```
 
-If you're going to be creating several Widgets that share common properties, you might find it convenient to call `setWidgetDefaults(props)` to specify them.  Calling it again with an empty object, as in `setWidgetDefaults({})`, will remove any defaults that have been set. The Widget Defaults start out blank at the beginning of each frame when your Widget Handler is first called.
+If you're going to be creating several Widgets that share common properties, you might find it convenient to call `setWidgetDefaults(props)` to specify them.  Calling it again with an empty object, as in `setWidgetDefaults({})`, will remove any defaults that have been set. The Widget Defaults start out blank each time your Widget Handler is called.
 
 ### Responding to Events
 
