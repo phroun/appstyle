@@ -1,5 +1,5 @@
 /*!
- * appstyle JavaScript Library v1.0.6
+ * appstyle JavaScript Library v1.0.7
  * https://github.com/phroun/appstyle
  *
  * Copyright Jeffrey R. Day and other contributors
@@ -7,7 +7,7 @@
  * https://github.com/phroun/appstyle/blob/main/LICENSE
  *
  * First Release: 2021-05-22T16:50Z
- * Last Updated:  2021-06-01
+ * Last Updated:  2021-06-02
  */
 
 var appstyle = (function() {
@@ -112,6 +112,30 @@ var appstyle = (function() {
       y: y - (win.private.cy + Math.floor(win.private.titleBarHeight) + 1)
     });
   });
+  
+  var invalidate = function(win_or_wid) {
+    var win;
+    if (typeof win_or_wid == "object") {
+      win = win_or_wid;
+    } else {
+      win = windowList[win_or_wid];
+    }
+    if (win) {
+      if (typeof win.private == "undefined") {
+        win.private = {};
+      }
+      win.private.invalidated = true;
+    }
+  }
+
+  var redraw = function(win) {
+    if (win) {
+      if (typeof win.private == "undefined") {
+        win.private = {};
+      }
+      win.private.redraw = true;
+    }
+  }
   
   var triggerEvent = function(win, evt) {
     var evid = '';
@@ -387,6 +411,15 @@ var appstyle = (function() {
     }
     return r;
   }
+
+  function sameWidgetReference(r1, r2) {
+    return ((typeof r1 == typeof r2)
+    && ((r1 == "undefined")
+    || ((r1.wid == r2.wid)
+    && (r1.id == r2.id)
+    && (r1.currentIndex == r2.currentIndex))
+    ));
+  }
   
   function getWidgetReference(win, widgetIndex) {
     var ref = {}
@@ -457,7 +490,6 @@ var appstyle = (function() {
       return; // need metrics first
     }
     
-    setWidgetDefaults(win, {});
     
     var uiScale = options.uiScaleFactor;
     if (uiScale < minScaleFactor) {
@@ -472,8 +504,31 @@ var appstyle = (function() {
     
     ctx.save();
     ctx.lineWidth   = 1;
+    
+    var recon = false;
+    var retain = win.retain || false;
+    var redraw = win.private.redraw || false;
 
-    win.private.widgets = [];
+    if (typeof win.immediate != "undefined") {
+      if (typeof win.immediate == "number") {
+        if ((typeof win.private.invfc == "undefined")
+        || (win.private.invfc <= 0)) {
+          win.private.invalidated = true;
+          win.private.invfc = Math.max(1, win.immediate);
+        }
+        win.private.invfc--;
+      } else {
+        win.private.invalidated = true;
+      }
+    }
+    
+    if (((typeof win.private.invalidated != "undefined") && (win.private.invalidated))
+    || (typeof win.private.widgets == "undefined")) {
+      recon = true;
+      win.private.invalidated = false;
+      setWidgetDefaults(win, {});
+      win.private.widgets = [];
+    }
 
     if (!(win.private.collapsed)) {
     
@@ -502,28 +557,33 @@ var appstyle = (function() {
     var barZone = win.private.titleBarHeight + 2;
     
     if (win.private.mouseInFlag) {
-      win.private.widgets.push({class: 'windowBorder', pixel: true, x: -1, y: -win.private.titleBarHeight, w: win.private.w+5 +
-      win.private.hSizer, h: win.private.h + win.private.titleBarHeight + win.private.vSizer});
-      win.private.widgets.push({class: 'window', pixel: true, x: 0, y: 0, w: win.private.w-1, h: win.private.h-1});
+      if (recon) {
+        win.private.widgets.push({class: 'windowBorder', pixel: true, x: -1, y: -win.private.titleBarHeight, w: win.private.w+5 +
+        win.private.hSizer, h: win.private.h + win.private.titleBarHeight + win.private.vSizer});
+        win.private.widgets.push({class: 'window', pixel: true, x: 0, y: 0, w: win.private.w-1, h: win.private.h-1});
+      }
     }
     
-    if (win.widgets) {
+    if (win.widgets && recon) {
       win.widgets(win);
     }
 
     if (win.private.mouseInFlag
     && (typeof win.titleBar != "undefined")
     && win.titleBar) {
-      win.private.widgets.push(
-        {
-          class: 'titleBar',
-          pixel: true,
-          x: -1,
-          y: 0 - barZone,
-          w: win.private.w+1,
-          h: barZone - 1
-        }
-      );
+    
+      if (recon) {
+        win.private.widgets.push(
+          {
+            class: 'titleBar',
+            pixel: true,
+            x: -1,
+            y: 0 - barZone,
+            w: win.private.w+1,
+            h: barZone - 1
+          }
+        );
+      }
 
       var cdpr = Math.min(2, Math.max(1, dpr)) - 1;
       var closeEdge = Math.ceil(12*uiScale); // Math.floor(topEdge * 0.6);
@@ -540,83 +600,99 @@ var appstyle = (function() {
 
       if (!win.noCloseBtn) {
         // Widget Region for Close Button
+        
+        if (recon) {
+          win.private.widgets.push(
+            {
+              class: 'closeBtn',
+              pixel: true,
+              x: Math.floor(closeEdge) + 0.5,
+              y: Math.floor(closeEdge) + 0.5 - barZone,
+              w: Math.floor(barZone - closeEdge*2),
+              h: Math.floor(barZone - closeEdge*2)
+            }
+          );
+        }
+
+      }
+    }
+    
+    if (recon) {
+
+      if (win.private.hSizer > 0) {
         win.private.widgets.push(
           {
-            class: 'closeBtn',
+            class: 'hSizer',
             pixel: true,
-            x: Math.floor(closeEdge) + 0.5,
-            y: Math.floor(closeEdge) + 0.5 - barZone,
-            w: Math.floor(barZone - closeEdge*2),
-            h: Math.floor(barZone - closeEdge*2)
+            x: win.private.w,
+            y: 0 - barZone,
+            w: win.private.hSizer + 2,
+            h: barZone - 1
+          }
+        );
+        win.private.widgets.push(
+          {
+            class: 'hSizer',
+            pixel: true,
+            x: win.private.w,
+            y: 0,
+            w: win.private.hSizer + 2,
+            h: win.private.h
           }
         );
       }
-    }
 
-    if (win.private.hSizer > 0) {
-      win.private.widgets.push(
-        {
-          class: 'hSizer',
-          pixel: true,
-          x: win.private.w,
-          y: 0 - barZone,
-          w: win.private.hSizer + 2,
-          h: barZone - 1
-        }
-      );
-      win.private.widgets.push(
-        {
-          class: 'hSizer',
-          pixel: true,
-          x: win.private.w,
-          y: 0,
-          w: win.private.hSizer + 2,
-          h: win.private.h
-        }
-      );
-    }
-
-    if (win.private.vSizer > 0) {
-      win.private.widgets.push(
-        {
-          class: 'vSizer',
-          pixel: true,
-          x: 0,
-          y: win.private.h,
-          w: win.private.w,
-          h: win.private.vSizer
-        }
-      );
-    }
-    if ((win.private.vSizer > 0) && (win.private.hSizer > 0)) {
-      win.private.widgets.push(
-        {
-          class: 'xSizer',
-          pixel: true,
-          x: win.private.w,
-          y: win.private.h - win.private.vSizer * 2,
-          w: win.private.hSizer,
-          h: win.private.vSizer * 3
-        }
-      );
-      win.private.widgets.push(
-        {
-          class: 'xSizer',
-          pixel: true,
-          x: win.private.w - win.private.hSizer * 2,
-          y: win.private.h,
-          w: win.private.hSizer * 3,
-          h: win.private.vSizer
-        }
-      );
-    }
+      if (win.private.vSizer > 0) {
+        win.private.widgets.push(
+          {
+            class: 'vSizer',
+            pixel: true,
+            x: 0,
+            y: win.private.h,
+            w: win.private.w,
+            h: win.private.vSizer
+          }
+        );
+      }
+      if ((win.private.vSizer > 0) && (win.private.hSizer > 0)) {
+        win.private.widgets.push(
+          {
+            class: 'xSizer',
+            pixel: true,
+            x: win.private.w,
+            y: win.private.h - win.private.vSizer * 2,
+            w: win.private.hSizer,
+            h: win.private.vSizer * 3
+          }
+        );
+        win.private.widgets.push(
+          {
+            class: 'xSizer',
+            pixel: true,
+            x: win.private.w - win.private.hSizer * 2,
+            y: win.private.h,
+            w: win.private.hSizer * 3,
+            h: win.private.vSizer
+          }
+        );
+      }
+    } // recon
 
     var mouseIn = getWidgetReference(win, -1);
     var mpos = getLocalPos(win, mouseX, mouseY);
-    
-    mouseIn = getWidgetAtPos(win, mpos.x, mpos.y, mouseIn);
 
+    mouseIn = getWidgetAtPos(win, mpos.x, mpos.y, mouseIn);
+    var otarg = win.private.mouseTarget;
     win.private.mouseTarget = mouseIn;
+    if (!sameWidgetReference(otarg, mouseIn)) {
+      invalidate(win);
+      if (mouseIn.wid) {
+        invalidate(mouseIn.wid);
+      }
+    }
+    
+    var prel = win.private.mouseElement;
+    
     if (dragdrop.wid == -1) {
       win.private.mouseElement = mouseIn;
     } else {
@@ -624,6 +700,13 @@ var appstyle = (function() {
         win.private.mouseElement = dragdrop.source;
       } else {
         win.private.mouseElement = getWidgetReference(win, -1);
+      }
+    }
+    
+    if (!sameWidgetReference(prel,win.private.mouseElement)) {
+      invalidate(win);
+      if (prel && prel.wid) {
+        invalidate(prel.wid);
       }
     }
 
@@ -919,6 +1002,17 @@ var appstyle = (function() {
         ctx.stroke();
       }
     }
+    
+    var can;
+    var con;
+
+    if (retain) {
+      if (typeof win.private.canvas == "undefined") {
+        win.private.canvas = document.createElement('canvas');
+        redraw = true;
+      }
+      can = win.private.canvas;
+    }
 
     // set up clip area for the window paint handler
     ctx.beginPath();
@@ -928,12 +1022,49 @@ var appstyle = (function() {
       ctx.rect(0.5, 0.5, win.private.w, win.private.h);
     }
     ctx.clip();
+
+    if (retain) {
+      if (redraw) {
+        win.private.redraw = false;
+        can.width = win.private.w;
+        can.height = win.private.h;
+        con = can.getContext('2d');
+        con.imageSmoothingEnabled = false;
+        con.mozImagSmoothingEnabled = false;
+        con.webkitImageSmoothingEnabled = false;
+        con.textBaseline = 'top';
+        con.scale(1,1);
+        if (halfPixel) {
+          con.translate(-0.5, -0.5);
+        }
+        try {
+          p = con.getImageData(1, 1, 1, 1).data;
+        } catch(err) {
+        }
+        con.save();
+
+        if (win.paint) {
+          win.paint(win, con);
+        } else {
+          drawBackground(win, con);
+          drawWidgets(win, con);
+        }
+        con.restore();
+      }
+    }
     
-    if (win.paint) {
-      win.paint(win, ctx);
+    ctx.beginPath();
+    if (retain) {
+      if (can && can.width && can.height) {
+        ctx.drawImage(can, 0, 0);
+      }
     } else {
-      drawBackground(win, ctx);
-      drawWidgets(win, ctx);
+      if (win.paint) {
+        win.paint(win, ctx);
+      } else {
+        drawBackground(win, ctx);
+        drawWidgets(win, ctx);
+      }
     }
 
     uiScale = originalScale;
@@ -1063,7 +1194,6 @@ var appstyle = (function() {
   }
   
   function drawWindowStack(c, ctx) {
-
     var keys = [];
     var buckets = [];
     for (var i=0; i < windowList.length; i++) {
@@ -1080,6 +1210,7 @@ var appstyle = (function() {
     }
     keys.sort();
     
+    var omowid = internalState.mouseOverWid;    
     internalState.mouseOverWid = -1;
     var lk = -1;
     
@@ -1106,6 +1237,11 @@ var appstyle = (function() {
       }
     }
     
+    if (internalState.mouseOverWid != omowid) {
+      invalidate(internalState.mouseOverWid);
+      invalidate(omowid);
+    }
+    
     if (internalState.mouseOverWid >= 0) {
       windowList[internalState.mouseOverWid].private.mouseInFlag = true;
     }
@@ -1125,9 +1261,7 @@ var appstyle = (function() {
         }
       }
     }
-
-
- }
+  }
 
   function updateCanvas(c) {
 
@@ -1379,6 +1513,7 @@ var appstyle = (function() {
     for (var i=0; i < windowList.length; i++) {
       win = windowList[i];
       if (typeof win.private != "undefined") {
+        invalidate(win);
         win.private.cx = Math.floor(Math.min(c.width - 80*options.uiScaleFactor, Math.max(0, win.x)));
         win.private.cy = Math.floor(Math.min(c.height - 30*options.uiScaleFactor, Math.max(0, win.y)));
         focusWidget = getWidgetReference(win, -1);
@@ -1395,6 +1530,7 @@ var appstyle = (function() {
       if ((focusWid != -1)
       && (typeof windowList[focusWid] != "undefined")) {
         windowList[focusWid].private.active = false;
+        invalidate(focusWid);
         triggerEvent(windowList[focusWid], {type: 'blur'});
       }
       focusWid = -1;
@@ -1411,6 +1547,7 @@ var appstyle = (function() {
         if (needFocus) {
           triggerEvent(windowList[focusWid], {type: 'focus'});
         }
+        invalidate(focusWid);
       }
     }
   }
@@ -1441,6 +1578,7 @@ var appstyle = (function() {
       if (internalState.mouseOverWid >= 0) {
         bringToTop(internalState.mouseOverWid);
         var win = windowList[internalState.mouseOverWid];
+        invalidate(win);
         if (win.private.mouseElement.class == 'window') {
           win.private.focusWidget = getWidgetReference(win, -1);
           win.private.focusWidgetWait = false;
@@ -1487,6 +1625,7 @@ var appstyle = (function() {
         } else {
           triggerEvent(windowList[internalState.mouseOverWid], {type: 'dragFrame', target: dragdrop.source});
         }
+        invalidate(win);
       } else {
         if (focusWid >= 0) {
           bringToTop(-1, true);
@@ -1555,6 +1694,7 @@ var appstyle = (function() {
           }
         }
       } // end default behavior
+      invalidate(internalState.mouseOverWid);
     } else {
       // could put event handeler here, but we need a global event hook!
       toggleFullScreen();
@@ -1564,6 +1704,7 @@ var appstyle = (function() {
   var closeWindow = function(wid) {
     windowList[wid].private.closed = true;
     windowList[wid].private.active = false;
+    invalidate(wid);
     if (focusWidget.wid == wid) {
       $('#myTextOverlay').css({top: '-1000px'});
       focusWidget = getWidgetReference(false, -1);
@@ -1651,9 +1792,13 @@ var appstyle = (function() {
         if (windowList[dragdrop.wid] && windowList[dragdrop.wid].private) {
           windowList[dragdrop.wid].private.dragdrop = false;
         }
+        var mcwid = mouseCaptureWid;
+        var ddwid = dragdrop.wid;
         mouseCaptureWid = -1;
         dragdrop.wid = -1;
         $('body').removeClass('dragging');
+        invalidate(mcwid);
+        invalidate(ddwid);
       }
     }
   }
@@ -1690,6 +1835,9 @@ var appstyle = (function() {
 
     mouseX = Math.floor(x / pixZoomFactor * systemDPR);
     mouseY = Math.floor(y / pixZoomFactor * systemDPR);
+    
+    var ddwid = dragdrop.wid;
+    var needinv = false;
 
     if ((dragdrop.wid >= 0) && (dragdrop.source.class == 'titleBar')) {
       var win = windowList[dragdrop.wid];
@@ -1724,6 +1872,7 @@ var appstyle = (function() {
         win.w = tw;
         win.private.cw = tw;
       }
+      needinv = true;
     }
 
     if ((dragdrop.wid >= 0) && ((dragdrop.source.class == 'vSizer') ||
@@ -1743,6 +1892,12 @@ var appstyle = (function() {
         win.h = th;
         win.private.ch = th;
       }
+      needinv = true;
+    }
+    
+    if (needinv) {
+      invalidate(ddwid);
+      invalidate(dragdrop.wid);
     }
     if (inTouchEvent) {
       updateCanvas(c);
@@ -1771,6 +1926,7 @@ var appstyle = (function() {
         charCode: e.charCode, keyCode: e.keyCode,
         shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey
       });
+      invalidate(focusWid);
     }
   }
 
@@ -1785,6 +1941,7 @@ var appstyle = (function() {
         charCode: e.charCode, keyCode: e.keyCode,
         shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey
       });
+      invalidate(focusWid);
     }
   }
 
@@ -1805,6 +1962,7 @@ var appstyle = (function() {
       if (focusWidget.wid != -1) {
         $('#myTextOverlay').css({top: '-1000px'});
         windowList[focusWidget.wid].private.focusWidget = getWidgetReference(windowList[focusWidget.wid], -1);
+        invalidate(focusWidget.wid);
       }
       focusWidget = getWidgetReference(false, -1);
     }
@@ -1812,9 +1970,11 @@ var appstyle = (function() {
   
   function ev_textchange() {
     if ((focusWidget.wid != -1) && (focusWidget.class == 'textInput')) {
-      if (windowList[focusWidget.wid]
-      && (typeof windowList[focusWidget.wid].storage != "undefined")) {
-        windowList[focusWidget.wid].storage[focusWidgetStorage].value = $('#myTextOverlay input')[0].value;
+      if (windowList[focusWidget.wid]) {
+        if (typeof windowList[focusWidget.wid].storage != "undefined") {
+          windowList[focusWidget.wid].storage[focusWidgetStorage].value = $('#myTextOverlay input')[0].value;
+        }
+        invalidate(focusWidget.wid);
       }
     }
   }
@@ -2566,6 +2726,7 @@ var appstyle = (function() {
       titleBar: true,
       title: 'Debugger', toolFrame: true,
       pixel: false,
+      immediate: 2,
       noCloseBtn: true,
       widgets: debuggerWidgets,
       event: debuggerEvents,
@@ -2692,6 +2853,8 @@ $(document).ready(function() {
     makeWindow: makeWindow,
     closeWindow: closeWindow,
     setWidgetDefaults: setWidgetDefaults,
+    invalidate: invalidate,
+    redraw: redraw,
     bringToTop: bringToTop,
     triggerEvent: triggerEvent,
 
@@ -2714,6 +2877,7 @@ $(document).ready(function() {
     isWithinWidget: isWithinWidget,
     registerWidgetClass: registerWidgetClass,
     getWidgetAtPos: getWidgetAtPos,
+    sameWidgetReference: sameWidgetReference,
     
     // auxiliary functions
     toggleFullScreen: toggleFullScreen,
