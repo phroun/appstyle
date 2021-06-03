@@ -37,6 +37,8 @@ As a minimum, props should include a field called `class` which specifies which 
   * `horizontalSize` - set this to `true` to allow horizontal resizing of this window
   * `verticalSize` - set this to `true` to allow vertical resizing of this window
   * `cursor` - set this to to a cursor number to change which mouse cursor is displayed when the pointer is over the content area of this window
+  * `immediate` - Normally, a window's widget list is only reconstructed when appstyle thinks the window needs to be redrawn. Set this to `true` to force the window's widget list to be reconstructed in real time on every frame (usually 60 times per second.) Set it to a number and it will be reconstructed every time the specified number of frames has passed. The window's widget list may be reconstructed more often than you have requested, for example, if the browser or the window is resized, or if the mouse pointer passes over or out of a previously defined widget.
+  * `retain` - Set this to `true` and the results of the paint operation will be kept, rather than being redrawn every frame. You can force an actual redraw to occur at the end of this frame by calling `appstyle.redraw(win)` (in the Widget Handler, for instance.)  When `retain` is combined with `immediate`, you may reconstruct your widget list each frame, but only repaint the widgets if you detected that an actual change has occurred.
 
 ### Mouse Cursor Numbers
 
