@@ -13,7 +13,7 @@ When you use appstyle.registerWindowClass() you get to specify some callbacks th
 
 In addition to callbacks, you can also specify whatever other default options you would like windows of this class to have. If you plan to share your Window Classes with other developers, choose a Class Name that is prefixed with a vendor identifier.  We use "appstyle." to prefix Window Classes provided by the appstyle library.
 
-## appstyle.makeWindow(props)]
+## appstyle.makeWindow(props)
 
 As a minimum, props should include a field called `class` which specifies which Window Class to apply to the window being created.
 
@@ -47,6 +47,14 @@ As a minimum, props should include a field called `class` which specifies which 
   2. horizontal sizer
   3. vertical sizer
   4. diagonal sizer
+
+## appstyle.invalidate(win_or_wid)
+
+Calling `appstyle.invalidate()` will force your window's widget list to be reconstructed on the current or upcoming frame.  You can call this, for example, if the underlying data used to popular the wigets has changed and you want to make sure those changes are reflected right away.  Note that if you also have the window's `retain` property set to true, calling `appstyle.invalidate()` may not be sufficient for the window not be repainted. See below.
+
+## appstyle.redraw(win)
+
+Calling `appstyle.redraw()` will force the window's contents to be repainted on the current or upcoming frame. This only applies when the window's `retain` property is set to `true`.  When `retain` is set to `false`, repainting occurs every frame (usually 60 times per second) using the most recently generated widget list.
 
 ### Accessing the Window List
 
