@@ -1,5 +1,5 @@
 /*!
- * appstyle JavaScript Library v1.0.7
+ * appstyle JavaScript Library v1.0.8
  * https://github.com/phroun/appstyle
  *
  * Copyright Jeffrey R. Day and other contributors
@@ -7,7 +7,7 @@
  * https://github.com/phroun/appstyle/blob/main/LICENSE
  *
  * First Release: 2021-05-22T16:50Z
- * Last Updated:  2021-06-02
+ * Last Updated:  2021-06-05
  */
 
 var appstyle = (function() {
@@ -82,6 +82,7 @@ var appstyle = (function() {
   var eventDispatcher = {};
   var modalCallback = false;
   var inTouchEvent = false;
+  var initialised = false;
 
   // internals exposed for developers:
   var dragdrop = {wid: -1};
@@ -233,7 +234,7 @@ var appstyle = (function() {
     }
     if ((typeof windowList[wid].x == "undefined") 
     || (typeof windowList[wid].y == "undefined")) {
-      var c = document.getElementById('myCanvas');
+      var c = document.getElementById('appstyle_canvas');
       processWindowMetrics(windowList[wid]);
       if (windowList[wid].pixel) {
         windowList[wid].x = Math.floor(Math.random() * Math.max(0, c.width - windowList[wid].private.cw - 4));
@@ -1153,7 +1154,7 @@ var appstyle = (function() {
     }
     var tw = win.private.cw;
     var th = win.private.ch;
-    var c = document.getElementById('myCanvas');
+    var c = document.getElementById('appstyle_canvas');
     if ((typeof win.pixel == "undefined") || (!win.pixel)) {
       var pos = getCharPos(win, tw, th);
       tw = pos.x;
@@ -1326,7 +1327,10 @@ var appstyle = (function() {
               }
             }
             if (drop) {
-              $('#focus_rest').focus();
+              var fr = document.getElementById('focus_rest');
+              if (fr) {
+                fr.focus();
+              }
             }
           }
         }
@@ -1354,19 +1358,23 @@ var appstyle = (function() {
               }
             }
             if (drop) {
-              $('#focus_rest').focus();
+              var fr = document.getElementById('focus_rest');
+              if (fr) {
+                fr.focus();
+              }
             }
           }
         }
       }
       if (focused.tagName == 'BODY') {
         if ( window.location == window.parent.location ) { // allow fiddle
-          $('#focus_rest').focus();
+          var fr = document.getElementById('focus_rest');
+          fr.focus();
         }
       }
     }
     
-    var txt = document.getElementById('myText');
+    var txt = document.getElementById('appstyle_textinput');
     if (txt) {
       if (!txt.dataset.init) {
         txt.addEventListener('change', ev_textchange, false);
@@ -1380,9 +1388,11 @@ var appstyle = (function() {
 
 
     cursorType = -1;
-    var clipper = document.getElementById('clipper');
-    clipper.scrollTop = 0;
-    clipper.scrollLeft = 0;
+    var clipper = document.getElementById('appstyle_clipper');
+    if (clipper) {
+      clipper.scrollTop = 0;
+      clipper.scrollLeft = 0;
+    }
 
     var ctx = c.getContext('2d');
     ctx.imageSmoothingEnabled = false;
@@ -1496,20 +1506,23 @@ var appstyle = (function() {
       pixZoomFactor = options.customPixZoomFactor;
     }
     
-    var c = document.getElementById('myCanvas');
+    var c = document.getElementById('appstyle_canvas');
     var ctx = c.getContext('2d');
     var w = Math.floor((window.innerWidth*systemDPR/pixZoomFactor) );
     var h = Math.floor((window.innerHeight*systemDPR/pixZoomFactor) );
-    c.width = w;
-    c.height = h;
-    $('#clipper').css({
-      width: ((w*pixZoomFactor/dpr) - 4) + 'px',
-      height: ((h*pixZoomFactor/dpr) - 4) + 'px'
-    });
-    $('#myCanvas').css({
-      width: (w*pixZoomFactor/dpr) + 'px',
-      height: (h*pixZoomFactor/dpr) + 'px'
-    });
+    if (c) {
+      c.width = w;
+      c.height = h;
+    }
+    var clipper = document.getElementById('appstyle_clipper');
+    if (clipper) {
+      clipper.style.width = ((w*pixZoomFactor/dpr) - 4) + 'px';
+      clipper.style.height = ((h*pixZoomFactor/dpr) - 4) + 'px';
+    }
+    if (c) {
+      c.style.width = (w*pixZoomFactor/dpr) + 'px';
+      c.style.height = (h*pixZoomFactor/dpr) + 'px';
+    }
     for (var i=0; i < windowList.length; i++) {
       win = windowList[i];
       if (typeof win.private != "undefined") {
@@ -1590,7 +1603,7 @@ var appstyle = (function() {
         } else {
           if (win.private.mouseElement.class != '') {
             dragdrop.wid = internalState.mouseOverWid;
-            $('body').addClass('dragging');
+            document.body.classList.add('dragging');
             windowList[internalState.mouseOverWid].private.dragdrop = true;
             dragdrop.source = win.private.mouseElement;
             dragdrop.ox = win.private.cx;
@@ -1632,7 +1645,7 @@ var appstyle = (function() {
         }
       }
     }
-    var c = document.getElementById('myCanvas');
+    var c = document.getElementById('appstyle_canvas');
     if ((!isRightMB) && ev.pointerId && c.setPointerCapture) {
       c.setPointerCapture(ev.pointerId);
     }
@@ -1641,7 +1654,7 @@ var appstyle = (function() {
   }
   
   var toggleFullScreen = function() {
-    var c = $('body')[0]; // document.getElementById('myCanvas');
+    var c = document.body;
     if (!superFullScreen) {
       if (c.webkitRequestFullScreen) {
         superFullScreen = true;
@@ -1706,7 +1719,10 @@ var appstyle = (function() {
     windowList[wid].private.active = false;
     invalidate(wid);
     if (focusWidget.wid == wid) {
-      $('#myTextOverlay').css({top: '-1000px'});
+      var mto = document.getElementById('appstyle_text_overlay');
+      if (mto) {
+        mto.style.top = '-1000px';
+      }
       focusWidget = getWidgetReference(false, -1);
     }
     if (internalState.mouseOverWid == wid) {
@@ -1726,7 +1742,7 @@ var appstyle = (function() {
       isRightMB = ev.button == 2; 
 
     if (!isRightMB) {
-      var c = document.getElementById('myCanvas');
+      var c = document.getElementById('appstyle_canvas');
       if (c.releasePointerCapture && ev.pointerId) {
         c.releasePointerCapture(ev.pointerId);
       }
@@ -1796,7 +1812,7 @@ var appstyle = (function() {
         var ddwid = dragdrop.wid;
         mouseCaptureWid = -1;
         dragdrop.wid = -1;
-        $('body').removeClass('dragging');
+        document.body.classList.remove('dragging');
         invalidate(mcwid);
         invalidate(ddwid);
       }
@@ -1804,7 +1820,7 @@ var appstyle = (function() {
   }
 
   function ev_mousemove(ev) {
-    var c = document.getElementById('myCanvas');
+    var c = document.getElementById('appstyle_canvas');
     var x, y;
     
     if (ev.changedTouches) {
@@ -1841,7 +1857,7 @@ var appstyle = (function() {
 
     if ((dragdrop.wid >= 0) && (dragdrop.source.class == 'titleBar')) {
       var win = windowList[dragdrop.wid];
-      var c = document.getElementById('myCanvas');
+      var c = document.getElementById('appstyle_canvas');
       win.x = dragdrop.ox + mouseX - dragdrop.x;
       win.y = dragdrop.oy + mouseY - dragdrop.y;
       win.private.cx = Math.floor(Math.min(c.width - 80*options.uiScaleFactor, Math.max(0, win.x)));
@@ -1858,7 +1874,7 @@ var appstyle = (function() {
     
     if ((dragdrop.wid >= 0) && ((dragdrop.source.class == 'hSizer') || (dragdrop.source.class == 'xSizer'))) {
       var win = windowList[dragdrop.wid];
-      var c = document.getElementById('myCanvas');
+      var c = document.getElementById('appstyle_canvas');
 
       if (win.pixel) {
         win.w = dragdrop.ow + (mouseX - dragdrop.x);
@@ -1878,7 +1894,7 @@ var appstyle = (function() {
     if ((dragdrop.wid >= 0) && ((dragdrop.source.class == 'vSizer') ||
     (dragdrop.source.class == 'xSizer'))) {
       var win = windowList[dragdrop.wid];
-      var c = document.getElementById('myCanvas');
+      var c = document.getElementById('appstyle_canvas');
 
       if (win.pixel) {
         win.h = dragdrop.oh + (mouseY - dragdrop.y);
@@ -1957,10 +1973,16 @@ var appstyle = (function() {
   function ev_textblur() {
     if ((focusWidget.class != '') && (!focusWidgetLoading)) {
       if ((focusWidget.wid != -1) && (focusWidget.class == 'textInput')) {
-        windowList[focusWidget.wid].storage[focusWidgetStorage].value = $('#myTextOverlay input')[0].value;
+        var myInput = document.querySelector('#appstyle_textinput');
+        if (myInput) {
+          windowList[focusWidget.wid].storage[focusWidgetStorage].value = myInput.value;
+        }
       }
       if (focusWidget.wid != -1) {
-        $('#myTextOverlay').css({top: '-1000px'});
+        var mto = document.getElementById('appstyle_text_overlay');
+        if (mto) {
+          mto.style.top = '-1000px';
+        }
         windowList[focusWidget.wid].private.focusWidget = getWidgetReference(windowList[focusWidget.wid], -1);
         invalidate(focusWidget.wid);
       }
@@ -1972,7 +1994,10 @@ var appstyle = (function() {
     if ((focusWidget.wid != -1) && (focusWidget.class == 'textInput')) {
       if (windowList[focusWidget.wid]) {
         if (typeof windowList[focusWidget.wid].storage != "undefined") {
-          windowList[focusWidget.wid].storage[focusWidgetStorage].value = $('#myTextOverlay input')[0].value;
+          var myInput = document.querySelector('#appstyle_textinput');
+          if (myInput) {
+            windowList[focusWidget.wid].storage[focusWidgetStorage].value = myInput.value;
+          }
         }
         invalidate(focusWidget.wid);
       }
@@ -1980,6 +2005,7 @@ var appstyle = (function() {
   }
 
   function drawTextInput(win, ctx, x, y, w, h, storage, id) {
+    var myt = document.getElementById('appstyle_textinput');
     var ids = id;
     if ((typeof ids == "undefined") || (ids == '')) {
       ids = storage;
@@ -1989,32 +2015,41 @@ var appstyle = (function() {
       drawTime = false;
       if ((focusWidget.wid != win.private.wid) || (focusWidget.id != ids)) {
         // initialize the new input
-        $('#myText').val(win.storage[storage].value);
+        if (myt) {
+          myt.value = win.storage[storage].value;
+        }
         drawTime = true;
         focusWidgetLoading = true;
         focusWidget = win.private.focusWidget;
         focusWidgetStorage = storage;
+        document.body.classList.remove('textInputHidden');
+        if (myt) {
+          myt.style.visibility = 'visible';
+          myt.style.display = 'block';
+        }
       }
       if (drawTime) {
-        $('#myTextOverlay').css({
-          left: Math.floor(((2 + windowList[win.private.wid].private.cx + x))*pixZoomFactor/dpr) + 'px',
-          top: (Math.floor(((2 + windowList[win.private.wid].private.cy + win.private.titleBarHeight -
-          4/pixZoomFactor + y))*pixZoomFactor/dpr) + 2-(dpr*pixZoomFactor/2)) + 'px',
-          display: 'block'
-        });
+        if (myt) {
+          myt.style.visibility = 'visible';
+        }
+        var mto = document.getElementById('appstyle_text_overlay');
+        mto.style.left = Math.floor(((2 + windowList[win.private.wid].private.cx + x))*pixZoomFactor/dpr) + 'px';
+        mto.style.top = (Math.floor(((2 + windowList[win.private.wid].private.cy + win.private.titleBarHeight -
+          4/pixZoomFactor + y))*pixZoomFactor/dpr) + 2-(dpr*pixZoomFactor/2)) + 'px';
+        mto.style.display = 'block';
 
         var mw = w * pixZoomFactor/dpr - 8;
         if (x + w > (win.private.w)) {
           mw = ((win.private.w - x) * pixZoomFactor/dpr) - 8;
         }
         if ((mw > 2) && ((y + h) < win.private.h)) {
-          $('#myText').css({
-            width: (mw-2) + 'px',
-            height: (((mh-8)/dpr)+(2/(dpr*pixZoomFactor))*2) + 'px',
-            fontSize: (((mh-12)/dpr)+(3/(dpr*pixZoomFactor))*3) + 'px',
-            visibility: 'visible'
-          });
-          $('body').removeClass('textInputHidden');
+          if (myt) {
+            myt.style.width = (mw-2) + 'px';
+            myt.style.height = (((mh-8)/dpr)+(2/(dpr*pixZoomFactor))*2) + 'px';
+            myt.style.fontSize = (((mh-12)/dpr)+(3/(dpr*pixZoomFactor))*3) + 'px';
+            myt.style.visibility = 'visible';
+            myt.style.display = 'block';
+          }
           if (win.private.active && (win.private.focusWidget.id == ids) &&
           (win.private.focusWidget.id != '')) {
             ctx.beginPath();
@@ -2023,10 +2058,10 @@ var appstyle = (function() {
             ctx.fill();
           }
         } else {
-          $('#myText').css({
-            visibility: 'hidden'
-          });
-          $('body').addClass('textInputHidden');
+          if (myt) {
+            myt.style.visibility = 'hidden';
+          }
+          document.body.classList.add('textInputHidden');
           ctx.beginPath();
           ctx.fillStyle = theme.colorInactiveTextInputBack;
           if (win.private.focusWidget.id == ids) {
@@ -2036,25 +2071,31 @@ var appstyle = (function() {
           ctx.fill();
         }
       } else {
-        var mto = document.getElementById('myTextOverlay');
+        var mto = document.getElementById('appstyle_text_overlay');
         if ( (mto.offsetLeft != (windowList[win.private.wid].private.cx + x))
         || (mto.offsetTop != (windowList[win.private.wid].private.cy + win.private.titleBarHeight + y))
         ) {
-          $('#myTextOverlay').css({
-            left: Math.floor((2 + windowList[win.private.wid].private.cx + x)*pixZoomFactor/dpr) + 'px',
-            top: (Math.floor((2 + windowList[win.private.wid].private.cy + win.private.titleBarHeight
+          mto.style.left = Math.floor((2 + windowList[win.private.wid].private.cx + x)*pixZoomFactor/dpr) + 'px';
+          mto.style.top = (Math.floor((2 + windowList[win.private.wid].private.cy + win.private.titleBarHeight
             - 4/pixZoomFactor + y)*pixZoomFactor/dpr) + 2 -
-            dpr*pixZoomFactor/2) + 'px'
-          });
+            dpr*pixZoomFactor/2) + 'px';
           var mw = w * pixZoomFactor/dpr - 8;
           if (x + w > (win.private.w)) {
             mw = ((win.private.w - x) * pixZoomFactor/dpr) - 8;
           }
-          $('#myText').css({
-            width: (mw-2) + 'px',
-            height: (((mh-8)/dpr)+(2/(dpr*pixZoomFactor))*2) + 'px',
-            fontSize: (((mh-12)/dpr)+(3/(dpr*pixZoomFactor))*3) + 'px'
-          });
+          if (y + h < win.private.h) {
+            document.body.classList.remove('textInputHidden');
+            if (myt) {
+              myt.style.width = (mw-2) + 'px';
+              myt.style.height = (((mh-8)/dpr)+(2/(dpr*pixZoomFactor))*2) + 'px';
+              myt.style.fontSize = (((mh-12)/dpr)+(3/(dpr*pixZoomFactor))*3) + 'px';
+              myt.style.visibility = 'visible';
+              myt.style.display = 'block';
+            }
+          } else {
+            myt.style.visibility = 'hidden';
+            document.body.classList.add('textInputHidden');
+          }
           if ((focusWidget.wid == win.private.wid) && (win.private.focusWidget.id == ids)) {
             ctx.beginPath();
             ctx.fillStyle = theme.colorActiveTextInputBack;
@@ -2069,8 +2110,11 @@ var appstyle = (function() {
         lastFocusWid = win.private.wid;
         lastFocusId = ids;
         setTimeout(function() {
-          $('#myText').focus();
-          $('#myText').select();
+          var myt = document.getElementById('appstyle_textinput');
+          if (myt) {
+            myt.focus();
+            myt.select();
+          }
         }, 1);
         if (mouseCaptureWid != -1) {
           triggerEvent(windowList[mouseCaptureWid], {type:'mouseUp',
@@ -2085,9 +2129,10 @@ var appstyle = (function() {
       }
     } else { // everything above this was current active input
       if ((focusWidget.wid == win.private.wid) && (focusWidget.id == ids)) {
-        $('#myTextOverlay').css({
-          top: -1000 + 'px'
-        });
+        var mto = document.getElementById('appstyle_text_overlay');
+        if (mto) {
+          mto.style.top = '-1000px';
+        }
       }
       ctx.fillStyle = theme.colorInactiveTextInputBack;
       ctx.strokeStyle = theme.colorInactiveTextInputEdge;
@@ -2156,7 +2201,7 @@ var appstyle = (function() {
       fpsTimeMeasurements = [];
     }
 
-    var c = document.getElementById('myCanvas');
+    var c = document.getElementById('appstyle_canvas');
     updateCanvas(c);
     window.requestAnimationFrame(animationFrame)    
   }
@@ -2491,11 +2536,15 @@ var appstyle = (function() {
   }
   
   function requestUpload(localStorageKey, callback) {
-    $('#appstyle_modal')[0].innerHTML = '<div class="appstyle_popwindow"><input type="file" name="files[]" id="fileUpload"></div>';
-    $('#appstyle_modal').css({zoom: 4.0});
-    $('#appstyle_modal')[0].addEventListener('mousedown', dismissModal, false);
-    $('#appstyle_modal .appstyle_popwindow')[0].addEventListener('mousedown', keepModal, false);
-    $('#appstyle_modal').show();
+    var modal = document.getElementById('appstyle_modal');
+    modal.innerHTML = '<div class="appstyle_popwindow"><input type="file" name="files[]" id="fileUpload"></div>';
+    modal.style.zoom = 2 * pixZoomFactor / dpr;
+    modal.addEventListener('pointerdown', dismissModal, false);
+    var modalpop = document.querySelector('#appstyle_modal div');
+    if (modalpop) {
+      modalpop.addEventListener('pointerdown', keepModal, false);
+    }
+    modal.style.display = 'block';
     modalCallback = callback;
     upload_init(localStorageKey, callback);
   }
@@ -2549,7 +2598,7 @@ var appstyle = (function() {
   
   function debuggerWidgets(win) {
     // debugger
-    var c = document.getElementById('myCanvas');
+    var c = document.getElementById('appstyle_canvas');
     var dbgLine1 = 'Scale: ' + (window.devicePixelRatio || 1).toFixed(1)
     + 'x' + pixZoomFactor
     + 'x' + options.uiScaleFactor.toFixed(2)
@@ -2625,8 +2674,9 @@ var appstyle = (function() {
   }
   
   function dismissModal() {
-    $('#appstyle_modal').hide();
-    $('#appstyle_modal').innerHTML = '';
+    var modal = document.getElementById('appstyle_modal');
+    modal.innerHTML = '';
+    modal.style.display = 'none';
     if (modalCallback) {
       modalCallback(false);
       modalCallback = false;
@@ -2658,8 +2708,9 @@ var appstyle = (function() {
           bigFile = event.target.result
         }
         var t = document.getElementById('previous');
-        $('#appstyle_modal').hide();
-        $('#appstyle_modal').innerHTML = '';
+        var modal = document.getElementById('appstyle_modal');
+        modal.innerHTML = '';
+        modal.style.display = 'none';
         modalCallback = false;
         if (callback) {
           callback(true, fileName);
@@ -2702,6 +2753,7 @@ var appstyle = (function() {
   }
 
   var init = function() {
+    initialised = true;
   
     registerWidgetClass('text', {
       inspectorText: function(win, widget) {
@@ -2767,7 +2819,7 @@ var appstyle = (function() {
         overflow: hidden;
         cursor: pointer;
       }
-      div#clipper {
+      #appstyle_clipper {
         position: fixed;
         top: 0px;
         left: 0px;
@@ -2775,13 +2827,13 @@ var appstyle = (function() {
         height: 10px;/*calc(100vh - 16px);*/
         overflow: hidden;
       }
-      div#myFocusOverlay {
+      #appstyle_focus_overlay {
         position: absolute;
         top: -1000px;
         visibility: visible;
         opacity: 0.1;
       }
-      #myCanvas {
+      #appstyle_canvas {
         background: #333;
         cursor: none;
         image-rendering: crisp-edges;
@@ -2796,21 +2848,24 @@ var appstyle = (function() {
         margin: 0;
         padding: 0;
       }
-      body.textInputHidden div#myTextOverlay,
-      body.dragging div#myTextOverlay {
+      body.textInputHidden div#appstyle_text_overlay,
+      body.dragging div#appstyle_text_overlay {
         pointer-events: none;
       }
-      input[type='text'] {
+      #appstyle_clipper input[type='text'] {
         background: rgba(0,0,0,0);
         color: #ccc;
       }
     `;
     document.getElementsByTagName('head')[0].appendChild(style);
 
-    $('body').append('<div id="clipper"><canvas id="myCanvas" width="10" height="10" style="z-index: 1;"></canvas><div id="myFocusOverlay"><input type="checkbox" tabindex="1" id="focus_last"><input type="checkbox" tabindex="2" id="focus_rest"><input type="checkbox" tabindex="3" id="focus_first"><input type="checkbox" tabindex="6" id="focus_post"><input type="checkbox" tabindex="4" id="focus_pre"></div><div id="myTextOverlay" style="position: absolute; z-index: 2; top: -1000px;"><input id="myText" type="text" name="textEntry" autocomplete="off" tabindex="5" value="" /></div><div id="appstyle_modal"></div></div>');
+    var clipper = document.createElement('div');
+    clipper.id = 'appstyle_clipper';
+    clipper.innerHTML = '<canvas id="appstyle_canvas" width="10" height="10" style="z-index: 1;"></canvas><div id="appstyle_focus_overlay"><input type="checkbox" tabindex="1" id="focus_last"><input type="checkbox" tabindex="2" id="focus_rest"><input type="checkbox" tabindex="3" id="focus_first"><input type="checkbox" tabindex="6" id="focus_post"><input type="checkbox" tabindex="4" id="focus_pre"></div><div id="appstyle_text_overlay" style="position: absolute; z-index: 2; top: -1000px;"><input id="appstyle_textinput" type="text" name="textEntry" autocomplete="off" tabindex="5" value="" /></div><div id="appstyle_modal"></div>';
+    document.querySelector('body').appendChild(clipper);
     mouseX = -100;
     mouseY = -100;
-    var c = document.getElementById('myCanvas');
+    var c = document.getElementById('appstyle_canvas');
     var dpr = window.devicePixelRatio;
     pixZoomFactor = Math.floor(dpr);
     options.uiScaleFactor = 0.5;
@@ -2830,7 +2885,10 @@ var appstyle = (function() {
     doResize();
     window.onresize = function() { doResize(); }
     window.requestAnimationFrame(animationFrame);
-    $('#focus_rest').focus();
+    var fr = document.getElementById('focus_rest');
+    if (fr) {
+      fr.focus();
+    }
   }
   
   function getMousePos(win) {
@@ -2843,12 +2901,21 @@ var appstyle = (function() {
     return mp;
   }
 
-$(document).ready(function() {
-  init();
-});
+  document.addEventListener('DOMContentLoaded', function() {
+    init();
+  });
+  
+  function ready(fn) {
+    if (initialised) {
+      fn();
+    } else {
+      document.addEventListener('DOMContentLoaded', fn);
+    }
+  }
   
   return {
     // basic usage
+    ready: ready,
     registerWindowClass: registerWindowClass,
     makeWindow: makeWindow,
     closeWindow: closeWindow,
