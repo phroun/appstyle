@@ -5,15 +5,12 @@ appstyle.js - a window manager for HTML5 canvas
 
 ## How do I start using appstyle?
 
-Currently jQuery is required, and needs to be loaded first. The dependency on jQuery is actually quite minimal and should be able to be removed in the near future.
-
 Here's a minimal example of an appstyle app:
 
 ```html
 <!DOCTYPE html>
 <head>
 <title>Minimal Appstyle Example</title>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <script src="appstyle.js"></script>
 <script>
 
@@ -21,7 +18,7 @@ Here's a minimal example of an appstyle app:
     appstyle.text(win, 'Hello World', {x: 0, y: 0, w: 20});
   }
 
-  $(document).ready(function() {
+  appstyle.ready(function() {
     appstyle.registerWindowClass('myWindow', {
       title: 'My Window',
       widgets: myWindowWidgets
@@ -32,8 +29,6 @@ Here's a minimal example of an appstyle app:
 </script>
 </head>
 ```
-
-Note: If you want your code to run without dependency on Internet access, you should download jquery and reference it locally with `<script src="jquery-3.6.0.min.js"></script>` instead of loading it from a CDN.
 
 ### Demo
 
@@ -112,7 +107,7 @@ function myWindowWidgets(win) {
   appstyle.button(win, 'myButton', 'Click Me!', {x:0, y:0, w:10});
 }
 
-$(document).ready(function() {
+appstyle.ready(function() {
   appstyle.registerWindowClass('myWindow', {
     title: 'My Window',
     widgets: myWindowWidgets,
