@@ -1,5 +1,5 @@
 /*!
- * appstyle JavaScript Library v1.0.8
+ * appstyle JavaScript Library v1.0.9
  * https://github.com/phroun/appstyle
  *
  * Copyright Jeffrey R. Day and other contributors
@@ -7,7 +7,7 @@
  * https://github.com/phroun/appstyle/blob/main/LICENSE
  *
  * First Release: 2021-05-22T16:50Z
- * Last Updated:  2021-06-05
+ * Last Updated:  2021-06-21
  */
 
 var appstyle = (function() {
@@ -83,6 +83,7 @@ var appstyle = (function() {
   var modalCallback = false;
   var inTouchEvent = false;
   var initialised = false;
+  var needDoResize = false;
 
   // internals exposed for developers:
   var dragdrop = {wid: -1};
@@ -387,13 +388,17 @@ var appstyle = (function() {
 
   function getWidgetAtPos(win, x, y, parentReference) {
     var mpos = {x: x, y: y};
-    r = parentReference;
+    var r = parentReference;
+    var prid = parentReference?.id;
+    if (!prid) {
+      prid = '';
+    }
     for (var i=0; i < win.private.widgets.length; i++) {
       var parid = win.private.widgets[i].parentId;
       if (typeof parid == "undefined") {
         parid = '';
       }
-      if (parid == parentReference.id) {
+      if (parid == prid) {
         var graven = win.private.widgets[i].graven;
         if ((!graven) && isWithinWidget(win, win.private.widgets[i], mpos.x, mpos.y,
         true)) {
@@ -538,12 +543,12 @@ var appstyle = (function() {
         // Outer Window Frame
         ctx.strokeStyle = theme.colorOutline;
         ctx.beginPath();
-        ctx.rect(win.private.cx-1,win.private.cy-1,win.private.w + 3 + win.private.hSizer, win.private.h + 3 + win.private.titleBarHeight + win.private.vSizer);
+        ctx.rect(win.private.cx-1,win.private.cy-1,win.private.w + 3 + win.private.hSizer, win.private.h + 1 + win.private.titleBarHeight + win.private.vSizer);
         ctx.stroke();
         
         // Inner Window Frame
         ctx.beginPath();
-        ctx.rect(win.private.cx, win.private.cy, win.private.w + 1 + win.private.hSizer, win.private.h + 1 + win.private.titleBarHeight + win.private.vSizer);
+        ctx.rect(win.private.cx, win.private.cy, win.private.w + 1 + win.private.hSizer, win.private.h - 0 + win.private.titleBarHeight + win.private.vSizer);
         if (win.private.active) {
           ctx.strokeStyle = theme.colorInlineActive;
         } else {
@@ -937,21 +942,21 @@ var appstyle = (function() {
         if (!win.private.active) {
           ctx.fillStyle = theme.colorSizerLow;
         }
-        ctx.rect(win.private.w+1.5,+0.5,win.private.hSizer-1, win.private.h+1);
+        ctx.rect(win.private.w+0.5,+0.5,win.private.hSizer, win.private.h);
         ctx.fill();
         ctx.beginPath();
         ctx.fillStyle = theme.colorSizerHigh;
         if (!win.private.active) {
           ctx.fillStyle = theme.colorSizerBack;
         }
-        ctx.rect(win.private.w+0.5,+0.5,2.5*uiScale,win.private.h+1);
+        ctx.rect(win.private.w+0.5,+0.5,2.5*uiScale,win.private.h);
         ctx.fill();
         ctx.beginPath();
         ctx.fillStyle = theme.colorSizerLow;
         if (!win.private.active) {
           ctx.fillStyle = theme.colorSizerInactive;
         }
-        ctx.rect(win.private.w+0.5+win.private.hSizer-2.5*uiScale,+0.5,2.5*uiScale+1,win.private.h+1);
+        ctx.rect(win.private.w+0.5+win.private.hSizer-2.5*uiScale,0.5,2.5*uiScale+1,win.private.h);
         ctx.fill();
       }
       if (win.private.vSizer > 0) {
@@ -960,46 +965,46 @@ var appstyle = (function() {
         if (!win.private.active) {
           ctx.fillStyle = theme.colorSizerLow;
         }
-        ctx.rect(-0.5,win.private.h+1.5,win.private.w+2,win.private.vSizer-1);
+        ctx.rect(-0.5,win.private.h-0.5,win.private.w+2,win.private.vSizer-0.5);
         ctx.fill();
         ctx.beginPath();
         ctx.fillStyle = theme.colorSizerHigh;
         if (!win.private.active) {
           ctx.fillStyle = theme.colorSizerBack;
         }
-        ctx.rect(-0.5,win.private.h+0.5,win.private.w+2,2.5*uiScale);
+        ctx.rect(-0.5,win.private.h-0.5,win.private.w+2,3*uiScale - 0.5);
         ctx.fill();
         ctx.beginPath();
         ctx.fillStyle = theme.colorSizerLow;
         if (!win.private.active) {
           ctx.fillStyle = theme.colorSizerInactive;
         }
-        ctx.rect(-0.5,win.private.h+0.5+win.private.vSizer-2.5*uiScale,win.private.w+2,1+2.5*uiScale);
+        ctx.rect(-0.5,win.private.h-0.5+win.private.vSizer-2.5*uiScale,win.private.w+2+win.private.hSizer,2.5*uiScale + 1);
         ctx.fill();
       }
       if ((win.private.hSizer > 0) && (win.private.vSizer > 0)) {
         ctx.beginPath();
         ctx.fillStyle = theme.colorSurfaceEdge;
-        ctx.rect(win.private.w-1,win.private.h-1,win.private.hSizer+3,win.private.vSizer+3);
+        ctx.rect(win.private.w-0,win.private.h-1,win.private.hSizer+2,win.private.vSizer+2);
         ctx.fill();
         ctx.beginPath();
         ctx.lineWidth = 4 - (pixZoomFactor);
         ctx.strokeStyle = theme.colorSurfaceEdge;
-        ctx.moveTo(win.private.w-1.5-win.private.hSizer,win.private.h+1.5+win.private.vSizer);
-        ctx.lineTo(win.private.w+1.5+win.private.hSizer,win.private.h-1.5-win.private.vSizer);
+        ctx.moveTo(win.private.w-1.5-win.private.hSizer,win.private.h+1.5+win.private.vSizer); // bottom left
+        ctx.lineTo(win.private.w+1+win.private.hSizer,win.private.h-0.5  -win.private.vSizer); // top right
         ctx.stroke();
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.strokeStyle = theme.colorSizerHigh;
         ctx.fillStyle = theme.colorSizerBack;
-        ctx.moveTo(win.private.w-0.5-win.private.hSizer,win.private.h+1.5+win.private.vSizer);
-        ctx.lineTo(win.private.w+1.5+win.private.hSizer,win.private.h-0.5-win.private.vSizer);
-        ctx.lineTo(win.private.w+1.5+win.private.hSizer,win.private.h+1.5+win.private.vSizer);
+        ctx.moveTo(win.private.w-0.5-win.private.hSizer,win.private.h+0.5 +win.private.vSizer); // bottom left
+        ctx.lineTo(win.private.w+1.5+win.private.hSizer,win.private.h-1.5 -win.private.vSizer); // top right
+        ctx.lineTo(win.private.w+1.5+win.private.hSizer,win.private.h+0.5 +win.private.vSizer); // bottom right
         ctx.closePath();
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(win.private.w-0.5-win.private.hSizer,win.private.h+1.5+win.private.vSizer);
-        ctx.lineTo(win.private.w+1.5+win.private.hSizer,win.private.h-0.5-win.private.vSizer);
+        ctx.moveTo(win.private.w+1-win.private.hSizer,win.private.h-0+win.private.vSizer); // bottom left
+        ctx.lineTo(win.private.w+1+win.private.hSizer,win.private.h+0-win.private.vSizer); // top right
         ctx.stroke();
       }
     }
@@ -1020,7 +1025,7 @@ var appstyle = (function() {
     if (win.private.collapsed) {
       ctx.rect(0.5, 0.5, win.private.w, 0);
     } else {
-      ctx.rect(0.5, 0.5, win.private.w, win.private.h);
+      ctx.rect(0.5, 0.5, win.private.w, win.private.h - 1);
     }
     ctx.clip();
 
@@ -1028,7 +1033,7 @@ var appstyle = (function() {
       if (redraw) {
         win.private.redraw = false;
         can.width = win.private.w;
-        can.height = win.private.h;
+        can.height = win.private.h + 1;
         con = can.getContext('2d');
         con.imageSmoothingEnabled = false;
         con.mozImagSmoothingEnabled = false;
@@ -1105,6 +1110,12 @@ var appstyle = (function() {
     if (typeof win.private.panelDepth == "undefined") {
       win.private.panelDepth = 0;
     }
+    if (win.w <= 0) {
+      win.w = 10;
+    }
+    if (win.h <= 0) {
+      win.h = 10;
+    }
     if (typeof win.private.cw == "undefined") {
       win.private.cw = win.w;
     }
@@ -1152,8 +1163,23 @@ var appstyle = (function() {
     } else {
       win.private.titleBarHeight = 0;
     }
-    var tw = win.private.cw;
-    var th = win.private.ch;
+
+    var tw = Math.max(0, win.private.cw);
+    var th = Math.max(0, win.private.ch);
+    
+    if (win.private.collapsed) {
+      if (win.titleBar) {
+        if (!win.pixel) { // reverse-engineer it so it calculates right below
+          var pos = getCharFromPos(win, 0, -2);
+          win.private.h = 0;
+          th = pos.y;
+        } else {
+          win.private.h = 0;
+          th = -2;
+        }
+      }
+    }
+
     var c = document.getElementById('appstyle_canvas');
     if ((typeof win.pixel == "undefined") || (!win.pixel)) {
       var pos = getCharPos(win, tw, th);
@@ -1161,18 +1187,27 @@ var appstyle = (function() {
       th = pos.y;
       var maxw = c.width - 10*options.uiScaleFactor;
       var maxh = c.height - 10*options.uiScaleFactor - (win.private.titleBarHeight || 0);
-      th = Math.min(maxh, th);
-      tw = Math.min(maxw, tw);
-      win.private.w = tw;
-      win.private.h = th;
+      th = Math.max(0, Math.min(maxh, th));
+      tw = Math.max(0, Math.min(maxw, tw));
+      win.private.w = Math.floor(tw);
+      win.private.h = Math.floor(th);
       var cfp = getCharFromPos(win, tw, th, false);
       win.vw = cfp.x;
       win.vh = cfp.y;      
+
+      win.private.gw = win.private.w;
+      win.private.gh = win.private.h;
+
     } else {
-      win.private.w = Math.floor(Math.min(c.width - 10*options.uiScaleFactor, Math.max(50, tw)));
+
+      // are the min and max nested backwards?
+      win.private.w = Math.floor(Math.floor(Math.min(c.width - 10*options.uiScaleFactor, Math.max(50, tw))));
       win.private.h = Math.floor(Math.min(c.height - 10*options.uiScaleFactor - win.private.titleBarHeight, Math.max(1, th)));
       win.vw = win.private.w;
       win.vh = win.private.h;
+
+      win.private.gw = win.private.w;
+      win.private.gh = win.private.h;
     }
 
     var sizerThickness = originalScale*12;
@@ -1225,10 +1260,10 @@ var appstyle = (function() {
             var win = windowList[wid];
 
             if ((mouseX >= windowList[wid].private.cx)
-            && (mouseX < windowList[wid].private.cx + windowList[wid].private.w+2 +
+            && (mouseX < windowList[wid].private.cx + windowList[wid].private.gw+2 +
             windowList[wid].private.hSizer)
             && (mouseY >= windowList[wid].private.cy)
-            && (mouseY < windowList[wid].private.cy + windowList[wid].private.h+2 +
+            && (mouseY < windowList[wid].private.cy + windowList[wid].private.gh+2 +
             windowList[wid].private.titleBarHeight +
             windowList[wid].private.vSizer)) {
               internalState.mouseOverWid = wid;
@@ -1273,13 +1308,15 @@ var appstyle = (function() {
           var r = triggerEvent(windowList[focusWid], {type:'focusFirst'});
           if (r) {
             var found = false;
-            var widg = windowList[focusWid].private.widgets;
-            for (var i=0;i < widg.length;i++) {
-              if (canWidgetFocus(windowList[focusWid], widg[i])) {
-                // set focus
-                windowList[focusWid].private.focusWidget = getWidgetReference(windowList[focusWid], i);
-                windowList[focusWid].private.focusWidgetWait = true;
-                break;
+            var widg = windowList[focusWid]?.private?.widgets;
+            if (widg.length) {
+              for (var i=0;i < widg.length; i++) {
+                if (canWidgetFocus(windowList[focusWid], widg[i])) {
+                  // set focus
+                  windowList[focusWid].private.focusWidget = getWidgetReference(windowList[focusWid], i);
+                  windowList[focusWid].private.focusWidgetWait = true;
+                  break;
+                }
               }
             }
           }
@@ -1538,7 +1575,7 @@ var appstyle = (function() {
 
   var bringToTop = function(wid, force) {
     var forceTop = force || false;
-    var needFocus = ((focusWid != wid) || (!windowList[wid].private.active));
+    var needFocus = ((focusWid != wid) || (!windowList[wid]?.private?.active));
     if (forceTop || needFocus) {
       if ((focusWid != -1)
       && (typeof windowList[focusWid] != "undefined")) {
@@ -1608,8 +1645,8 @@ var appstyle = (function() {
             dragdrop.source = win.private.mouseElement;
             dragdrop.ox = win.private.cx;
             dragdrop.oy = win.private.cy;
-            dragdrop.ow = win.private.w;
-            dragdrop.oh = win.private.h;
+            dragdrop.ow = win.private.gw;
+            dragdrop.oh = win.private.gh;
             dragdrop.ex = -100;
             dragdrop.ey = -100;
             dragdrop.ec = 'âˆ…';
@@ -1630,8 +1667,8 @@ var appstyle = (function() {
         }
         var mpos = getLocalPos(windowList[internalState.mouseOverWid], mouseX, mouseY);
         if ((mpos.y >= 0) && (mpos.x >= 0)
-        && (mpos.x < windowList[internalState.mouseOverWid].private.w)
-        && (mpos.y < windowList[internalState.mouseOverWid].private.h)
+        && (mpos.x < windowList[internalState.mouseOverWid].private.gw)
+        && (mpos.y < windowList[internalState.mouseOverWid].private.gh)
         ) { // only pass content events to handler
           mouseCaptureWid = internalState.mouseOverWid;
           triggerEvent(windowList[internalState.mouseOverWid], {type: 'mouseDown', target: dragdrop.source});
@@ -1683,28 +1720,10 @@ var appstyle = (function() {
           var win = windowList[internalState.mouseOverWid];
           if (win.titleBar && (!win.private.collapsed)) {
             win.private.collapsed = true;
-            if (win.titleBar) {
-              win.private.collapseHeight = win.private.ch;
-              if (!win.pixel) {
-                var pos = getCharFromPos(win, 0, -2);
-                win.private.h = 0;
-                win.h = pos.y;
-                win.private.ch = pos.y;
-              } else {
-                win.private.h = 0;
-                win.h = -2;
-                win.private.ch = -2;
-              }
-            }
-            processWindowMetrics(win);
           } else {
             win.private.collapsed = false;
-            if (win.titleBar) {
-              win.private.ch = win.private.collapseHeight;
-              win.h = win.private.collapseHeight;
-            }
-            processWindowMetrics(win);
           }
+          processWindowMetrics(win);
         }
       } // end default behavior
       invalidate(internalState.mouseOverWid);
@@ -1714,9 +1733,16 @@ var appstyle = (function() {
     }
   }
   
-  var closeWindow = function(wid) {
-    windowList[wid].private.closed = true;
-    windowList[wid].private.active = false;
+  var closeWindow = function(win_or_wid) {
+    var win;
+    if (typeof win_or_wid == "object") {
+      win = win_or_wid;
+    } else {
+      win = windowList[win_or_wid];
+    }
+    var wid = win.private.wid;
+    win.private.closed = true;
+    win.private.active = false;
     invalidate(wid);
     if (focusWidget.wid == wid) {
       var mto = document.getElementById('appstyle_text_overlay');
@@ -1763,8 +1789,8 @@ var appstyle = (function() {
         if (internalState.mouseOverWid >= 0) {
           var mpos = getLocalPos(windowList[internalState.mouseOverWid], mouseX, mouseY);
           contentArea = ((mpos.y >= 0) && (mpos.x >= 0)
-          && (mpos.x < windowList[internalState.mouseOverWid].private.w)
-          && (mpos.y < windowList[internalState.mouseOverWid].private.h)
+          && (mpos.x < windowList[internalState.mouseOverWid].private.gw)
+          && (mpos.y < windowList[internalState.mouseOverWid].private.gh)
           );
         }
 
@@ -1860,7 +1886,8 @@ var appstyle = (function() {
       var c = document.getElementById('appstyle_canvas');
       win.x = dragdrop.ox + mouseX - dragdrop.x;
       win.y = dragdrop.oy + mouseY - dragdrop.y;
-      win.private.cx = Math.floor(Math.min(c.width - 80*options.uiScaleFactor, Math.max(0, win.x)));
+      var hMargin = 80*options.uiScaleFactor;
+      win.private.cx = Math.floor(Math.min(c.width - hMargin, Math.max(Math.min(hMargin, hMargin-win.private.gw), win.x)));
       win.private.cy = Math.floor(Math.min(c.height - 30*options.uiScaleFactor, Math.max(0, win.y)));
     }
 
@@ -1875,18 +1902,37 @@ var appstyle = (function() {
     if ((dragdrop.wid >= 0) && ((dragdrop.source.class == 'hSizer') || (dragdrop.source.class == 'xSizer'))) {
       var win = windowList[dragdrop.wid];
       var c = document.getElementById('appstyle_canvas');
+      var hMargin = 80*options.uiScaleFactor;
 
       if (win.pixel) {
-        win.w = dragdrop.ow + (mouseX - dragdrop.x);
-        win.private.cw = Math.floor(Math.min(c.width - 10*options.uiScaleFactor, Math.max(50, win.w)));
+        var minWidth = hMargin;
+        var dragOffset = (mouseX - dragdrop.x);
+        if (win.private.cx < 0) {
+          minWidth = hMargin - win.private.cx;
+        }
+        
+        var maxWidth = c.width - 10*options.uiScaleFactor;
+
+        win.w = Math.floor(Math.min(maxWidth, Math.max(minWidth, dragdrop.ow + dragOffset)));
+        win.private.cw = win.w;
+        win.private.gw = win.w;
       } else {
-        var tw = Math.max(50, dragdrop.ow + (mouseX - dragdrop.x));
+
+        var extra = 0;
+        if (win.private.cx < 0) {
+          extra = 0 - win.private.cx;
+        }
+        var spos = getCharFromPos(win, hMargin + extra, 0);
+        var minWidth = spos.x;
+
+        var tw = Math.max(1, dragdrop.ow + (mouseX - dragdrop.x));
         var th = win.private.h;
         var pos = getCharFromPos(win, tw, th);
         var maxpos = getCharFromPos(win, c.width - 10*options.uiScaleFactor, 0);
         var tw = Math.min(maxpos.x, pos.x);
-        win.w = tw;
-        win.private.cw = tw;
+        win.w = Math.max(minWidth, tw);
+        win.private.cw = win.w;
+        win.private.gw = win.w;
       }
       needinv = true;
     }
@@ -1897,7 +1943,7 @@ var appstyle = (function() {
       var c = document.getElementById('appstyle_canvas');
 
       if (win.pixel) {
-        win.h = dragdrop.oh + (mouseY - dragdrop.y);
+        win.h = Math.max(0, dragdrop.oh + (mouseY - dragdrop.y));
         win.private.ch = Math.floor(Math.min(c.height - 10*options.uiScaleFactor - (win.private.titleBarHeight || 0), Math.max(1, win.h)));
       } else {
         var th = Math.max(1, dragdrop.oh + (mouseY - dragdrop.y));
@@ -1905,7 +1951,7 @@ var appstyle = (function() {
         var pos = getCharFromPos(win, tw, th);
         var maxpos = getCharFromPos(win, 0, c.height - 10*options.uiScaleFactor - (win.private.titleBarHeight || 0));
         var th = Math.min(maxpos.y, pos.y);
-        win.h = th;
+        win.h = Math.max(0, th);
         win.private.ch = th;
       }
       needinv = true;
@@ -2042,7 +2088,7 @@ var appstyle = (function() {
         if (x + w > (win.private.w)) {
           mw = ((win.private.w - x) * pixZoomFactor/dpr) - 8;
         }
-        if ((mw > 2) && ((y + h) < win.private.h)) {
+        if ((mw > 2) && ((y + h) < win.private.gh)) {
           if (myt) {
             myt.style.width = (mw-2) + 'px';
             myt.style.height = (((mh-8)/dpr)+(2/(dpr*pixZoomFactor))*2) + 'px';
@@ -2083,7 +2129,7 @@ var appstyle = (function() {
           if (x + w > (win.private.w)) {
             mw = ((win.private.w - x) * pixZoomFactor/dpr) - 8;
           }
-          if (y + h < win.private.h) {
+          if (y + h < win.private.gh) {
             document.body.classList.remove('textInputHidden');
             if (myt) {
               myt.style.width = (mw-2) + 'px';
@@ -2190,6 +2236,10 @@ var appstyle = (function() {
   let fpsTimeMeasurements     = [];
   
   function animationFrame(ev) {
+    if (needDoResize) {
+      needDoResize = false;
+      doResize();
+    }
     fpsTimeMeasurements.push(performance.now());
 
     const msPassed = fpsTimeMeasurements[fpsTimeMeasurements.length - 1] - fpsTimeMeasurements[0];
@@ -2280,7 +2330,7 @@ var appstyle = (function() {
       ctx.fillStyle = theme.colorInactiveBack;
     }
     ctx.beginPath();
-    ctx.rect(0 - 10, 0 - 10, win.private.w + 20, win.private.h + 20);
+    ctx.rect(0 - 10, 0 - 10, win.private.gw + 20, win.private.gh + 20);
     ctx.fill();
     if (win.charGrid) {
       if (win.private.active) {
@@ -2290,21 +2340,21 @@ var appstyle = (function() {
       }
       var xo = Math.floor(win.private.charOffsetX * win.private.charWidth);
       var x = 0;
-      while (xo + x*win.private.charWidth < win.private.w) {
+      while (xo + x*win.private.charWidth < win.private.gw) {
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(xo + x*win.private.charWidth - 0, 0);
-        ctx.lineTo(xo + x*win.private.charWidth - 0, win.private.h);
+        ctx.lineTo(xo + x*win.private.charWidth - 0, win.private.gh);
         ctx.stroke();
         x++;
       }
       var yo = Math.floor(win.private.charOffsetY * win.private.charHeight);
       var y = 0;
-      while (yo + y*win.private.charHeight < win.private.h) {
+      while (yo + y*win.private.charHeight < win.private.gh) {
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(0, yo + y*win.private.charHeight - 0);
-        ctx.lineTo(win.private.w, yo + y*win.private.charHeight - 0);
+        ctx.lineTo(win.private.gw, yo + y*win.private.charHeight - 0);
         ctx.stroke();
         y++;
       }
@@ -2510,8 +2560,6 @@ var appstyle = (function() {
             var zSort = {};
             for (var i=0; i < savedState.length; i++) {
               found = true;
-              console.log('Restoring:');
-              console.log(savedState[i]);
               var wid = appstyle.makeWindow(savedState[i], true);
               zSort[wid] = savedState[i].z;
             }
@@ -2526,7 +2574,7 @@ var appstyle = (function() {
         }
       }
     }
-    doResize();
+    needDoResize = true;
     return found;
   }
   
@@ -2913,6 +2961,28 @@ var appstyle = (function() {
     }
   }
   
+  function findWindow(props) {
+    var res = [];
+    for (var i=0; i < windowList.length; i++) {
+      var good = true;
+      for (const key in props) {
+        if (props.hasOwnProperty(key)) {
+          if (! ((typeof windowList[i][key] != "undefined")
+          && (windowList[i][key] == props[key]))) {
+            good = false;
+          }
+        }
+      }
+      if (good) {
+        res.push(windowList[i]);
+      }
+    }
+    if (res.length == 0) {
+      res.push({ class: 'not.found' });
+    }
+    return res;
+  }
+  
   return {
     // basic usage
     ready: ready,
@@ -2957,6 +3027,7 @@ var appstyle = (function() {
 
     // other things
     windowList: windowList,
+    findWindow: findWindow,
     windowClasses: windowClasses,
     widgetClasses: widgetClasses,
     options: options,
