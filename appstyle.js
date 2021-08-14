@@ -1,5 +1,5 @@
 /*!
- * appstyle JavaScript Library v1.0.12
+ * appstyle JavaScript Library v1.0.13
  * https://github.com/phroun/appstyle
  *
  * Copyright Jeffrey R. Day and other contributors
@@ -142,7 +142,7 @@ var appstyle = (function() {
     }
   }
   
-  var triggerEvent = function(win, evt, bev) {
+  var triggerEvent = function(win, evt, browserEventObject) {
     var evid = '';
     if (win && win.private) {
       evid = win.private.wid + ':' + evt.type;
@@ -159,7 +159,7 @@ var appstyle = (function() {
         var restoreX = win.private.cx + 1
         var restoreY = win.private.cy + Math.floor(tbh) + 1;
         if (win.event) {
-          r = win.event(win, evt, bev);
+          r = win.event(win, evt, browserEventObject);
           if (typeof r == 'undefined') {
             r = true;
           }
@@ -1050,10 +1050,10 @@ var appstyle = (function() {
         if (halfPixel) {
           con.translate(-0.5, -0.5);
         }
-        try {
+/*        try {
           p = con.getImageData(1, 1, 1, 1).data;
         } catch(err) {
-        }
+        }*/
         con.save();
 
         if (win.paint) {
@@ -1461,10 +1461,10 @@ var appstyle = (function() {
     if (halfPixel) {
       ctx.translate(0.5, 0.5);
     }
-    try {
+/*    try {
       p = ctx.getImageData(1, 1, 1, 1).data;
     } catch(err) {
-    }
+    }*/
 
     ctx.lineWidth = 2;
     ctx.fillStyle = '#ffffff';
@@ -1544,6 +1544,9 @@ var appstyle = (function() {
       if (cursorType == 5) {
         sysCursor = 'text';
       }
+      if (cursorType == 6) {
+        sysCursor = 'pointer';
+      }
       c.style.cursor = sysCursor;
     } else {
       if (options.drawCursor) {
@@ -1593,11 +1596,13 @@ var appstyle = (function() {
     for (var i=0; i < windowList.length; i++) {
       var win = windowList[i];
       if (typeof win.private != "undefined") {
+        
         invalidate(win);
         win.private.cx = Math.floor(Math.min(c.width - 80*options.uiScaleFactor, Math.max(0, win.x)));
         win.private.cy = Math.floor(Math.min(c.height - 30*options.uiScaleFactor, Math.max(0, win.y)));
         focusWidget = getWidgetReference(win, -1);
         processWindowMetrics(win);
+        triggerEvent(win, {type: 'resize'});
       }
     }
     updateCanvas(c);
@@ -1606,7 +1611,7 @@ var appstyle = (function() {
   var bringToTopOnly = function(wid, force) {
     if ((wid >= 0) && (windowList[wid])) {
       var neverRaise = windowList[wid].neverRaise;
-      if (typeof neverRaised == "undefined") {
+      if (typeof neverRaise == "undefined") {
         neverRaise = false;
       }
       if (force || (!neverRaise)) {
@@ -2337,7 +2342,11 @@ var appstyle = (function() {
   }
 
   function widgetPaintText(win, ctx, widg, ofs) {
-    drawText(win, ctx, ofs.x, ofs.y, ofs.w, ofs.h, widg.caption, widg.font, widg.color);
+    var align = widg.textAlign || 'left';
+    switch (align) {
+      case 'left': drawText(win, ctx, ofs.x, ofs.y, ofs.w, ofs.h, widg.caption, widg.font, widg.color); break;
+      case 'center': drawTextCentered(win, ctx, ofs.x, ofs.y, ofs.w, ofs.h, widg.caption, widg.font, widg.color); break;
+    }
   }
 
   var text = function(win, caption, props) {
@@ -2617,14 +2626,16 @@ var appstyle = (function() {
     return wp;
   }
   
-  function saveEnvironment() {
-    window.localStorage.setItem('appstyle.json', JSON.stringify(getEnvironment()));
+  function saveEnvironment(appName) {
+    var name = appName || 'appstyle.json';
+    window.localStorage.setItem(name, JSON.stringify(getEnvironment()));
     return true;
   }
   
-  function loadEnvironment() {
+  function loadEnvironment(appName) {
     var found = false;
-    var savedState = window.localStorage.getItem('appstyle.json');
+    var name = appName || 'appstyle.json';
+    var savedState = window.localStorage.getItem(name);
     if (typeof savedState != "undefined") {
       if (savedState != '') {
         savedState = JSON.parse(savedState);
@@ -3143,11 +3154,39 @@ appstyle.button = (function() {
     ctx.beginPath();
     var xpd;
     xpd = (win.private.panelDepth + 8) * 16;
-    var color = 'rgb(' + (xpd*appstyle.theme.bevelTint[0]) + ',' +
-    (xpd*appstyle.theme.bevelTint[1]) + ',' + (xpd*appstyle.theme.bevelTint[2]) + ')';
+    var tint = [...appstyle.theme.bevelTint];
+    if (widg.tint) {
+      if ((typeof widg.tint == "string") && (widg.tint.substring(0, 1) == '#')) {
+        if (widg.tint.length == 4) {
+          tint[0] = parseInt(Number('0x' + widg.tint.substring(1,2)), 10) / 8;
+          tint[1] = parseInt(Number('0x' + widg.tint.substring(2,3)), 10) / 8;
+          tint[2] = parseInt(Number('0x' + widg.tint.substring(2,4)), 10) / 8;
+        } else {
+          tint[0] = parseInt(Number('0x' + widg.tint.substring(1,3)), 10) / 128;
+          tint[1] = parseInt(Number('0x' + widg.tint.substring(3,5)), 10) / 128;
+          tint[2] = parseInt(Number('0x' + widg.tint.substring(5,7)), 10) / 128;
+        }
+      } else {
+        tint = widg.tint;
+      }
+    }
+    var cr = (xpd*tint[0]);
+    var cg = (xpd*tint[1]);
+    var cb = (xpd*tint[2]);
+    var color = 'rgb(' + cr + ',' + cg + ',' + cb + ')';
+    var oclum = (cr * 3 + cg * 6 + cb);
     ctx.fillStyle = '#000000';
+    var colorlum = 0;
     if (widg.color) {
       ctx.fillStyle = widg.color;
+      if (widg.color.substring(0, 1) == '#') {
+        if (widg.color.length == 6) {
+          cr = parseInt(Number('0x' + widg.color.substring(1, 3)), 10);
+          cg = parseInt(Number('0x' + widg.color.substring(3, 5)), 10);
+          cb = parseInt(Number('0x' + widg.color.substring(5, 7)), 10);
+          colorlum = (cr * 3 + cg * 6 + cb);
+        }
+      }
     }
     ctx.beginPath();
     ctx.rect(ofs.x,ofs.y,ofs.w+1,ofs.h+1);
@@ -3157,6 +3196,7 @@ appstyle.button = (function() {
     || (widg.hover && (appstyle.internals.state.mouseOverWid == win.private.wid) && (win.private.mouseTarget.id == widg.id))
     || (widg.highlight)) {
       ctx.fillStyle = color;
+      colorlum = oclum;
     }
     ctx.rect(ofs.x+1,ofs.y+1,ofs.w-1,ofs.h-1);
     ctx.fill();
@@ -3168,7 +3208,7 @@ appstyle.button = (function() {
       pressed = false;
     }
     if (!widg.flat) {
-      appstyle.drawBevel(ctx, ofs, -(thick+2), thick+1, win.private.panelDepth+8, (!pressed))
+      appstyle.drawBevel(ctx, ofs, -(thick+2), thick+1, win.private.panelDepth+8, (!pressed), tint);
     }
     var prx = 0;
     var pry =0;
@@ -3176,16 +3216,29 @@ appstyle.button = (function() {
       prx = Math.ceil(thick/2);
       pry = Math.ceil(thick/2);
     }
+
+    var btnFore;
+    if (win.private.active) {
+      btnFore = appstyle.theme.colorActiveTextFore;
+    } else {
+      btnFore = appstyle.theme.colorInactiveTextFore;
+    }
+    if (colorlum > 1400) { // guesswork
+      btnFore = '#000000';
+    }
+    
+    let windowFontName = '"Helvetica"';
+    
     if (widg.textAlign == 'left') {
       appstyle.drawText(win, ctx, prx+ofs.x+thick*3+1, pry+ofs.y+thick*2+1,
       ofs.w-thick*5-2,
-      ofs.h-thick*4-2, widg.caption);
+      ofs.h-thick*4-2, widg.caption, windowFontName, btnFore);
     } else {
       appstyle.drawTextCentered(win, ctx, prx+ofs.x+thick*2+1, pry+ofs.y+thick*2+1,
       ofs.w-thick*4-2,
-      ofs.h-thick*4-2, widg.caption);
+      ofs.h-thick*4-2, widg.caption, windowFontName, btnFore);
     }
-  }  
+  }
 
   var button = function(win, id, caption, props) {
     var o = {
